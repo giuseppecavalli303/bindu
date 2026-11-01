@@ -1,17 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#FBF6FA"/>
-  <circle cx="256" cy="256" r="200" fill="#F1E6F7"/>
-  <g transform="translate(96 92) scale(8)" stroke-width="1.1" stroke-linejoin="round">
-    <g fill="#F5C4D8" stroke="#A8457A">
-      <path d="M20 2.5c3.2 3.2 3.6 7.4 0 12-3.6-4.6-3.2-8.8 0-12Z"/>
-      <path d="M18.8 14.6c-3.8-.4-7.4-2.8-9.4-6.8 4.4 0 8 2.5 9.4 6.8Z"/>
-      <path d="M21.2 14.6c3.8-.4 7.4-2.8 9.4-6.8-4.4 0-8 2.5-9.4 6.8Z"/>
-    </g>
-    <g fill="#CFCCF4" stroke="#5650A6">
-      <rect x="16" y="17.4" width="8" height="3.8" rx="1.9"/>
-      <rect x="15.2" y="22.6" width="9.6" height="3.8" rx="1.9"/>
-      <rect x="14.8" y="27.8" width="10.4" height="3.8" rx="1.9"/>
-      <rect x="15.8" y="33" width="8.4" height="3.6" rx="1.8"/>
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Bindu — loto e colonna</title>
+  <desc>Un loto rosa aperto sopra quattro vertebre lavanda, su fondo prugna.</desc>
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#65445F"/><stop offset="1" stop-color="#402C42"/>
+    </linearGradient>
+    <linearGradient id="petalo" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#FAE0DF"/><stop offset="1" stop-color="#E5A8C5"/>
+    </linearGradient>
+  </defs>
+  <!-- Fondo pieno: gli angoli e le maschere sono applicati dal sistema operativo. -->
+  <rect width="512" height="512" fill="url(#fondo)"/>
+  <!-- Il simbolo resta nel cerchio sicuro centrale di raggio 204.8 px. -->
+  <circle cx="256" cy="104" r="8" fill="#F2D5CE"/>
+  <g stroke="#53364F" stroke-width="6" stroke-linejoin="round">
+    <path d="M256 254 C210 233 167 194 169 148 C216 159 249 193 256 254Z" fill="#D994B5"/>
+    <path d="M256 254 C302 233 345 194 343 148 C296 159 263 193 256 254Z" fill="#D994B5"/>
+    <path d="M256 252 C212 211 218 162 256 126 C294 162 300 211 256 252Z" fill="url(#petalo)"/>
+    <path d="M256 254 C194 266 146 231 130 192 C181 184 231 204 256 254Z" fill="#F2C6D6"/>
+    <path d="M256 254 C318 266 366 231 382 192 C331 184 281 204 256 254Z" fill="#F2C6D6"/>
+  </g>
+  <g fill="#CFC8EB">
+    <rect x="227" y="278" width="58" height="22" rx="11"/>
+    <rect x="219" y="313" width="74" height="23" rx="11.5"/>
+    <rect x="213" y="349" width="86" height="23" rx="11.5"/>
+    <rect x="226" y="385" width="60" height="22" rx="11"/>
   </g>
 </svg>

@@ -69,3 +69,11 @@ I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`crea
 - Prima di riprendere, leggere il branch aggiornato. Al termine di ogni intervento annotare qui modifiche, verifiche e attività residue per il passaggio Claude/Codex.
 
 - Verifiche: sintassi JavaScript valida; struttura dei moduli ingresso/codice verificata per email, SMS e WhatsApp; anteprima browser desktop e mobile 375 px controllata. Nessun accesso reale con OTP eseguito.
+
+## Icona Home · 1 novembre 2026 · Codex
+
+- Ridisegnata `icona.svg`: fondo prugna pieno, loto rosa a cinque petali, punto bindu e quattro vertebre lavanda. Il logo inline dell’header resta invariato.
+- PNG opachi 180 (Apple), 192 e 512 px generati dal vettoriale. Simbolo nella zona sicura centrale per maschere Android; niente angoli arrotondati incorporati.
+- Manifest e riferimenti icone versionati `?v=2`; manifest aggiornato con scopo `any maskable` per i PNG 192/512 e colori avorio. Nessuna modifica a start_url o scope.
+- Per rigenerare: usare Sharp/libvips dal file SVG, ridimensionare a 180/192/512 px ed esportare PNG RGB senza alpha.
+- Verifiche: ispezione del PNG, dimensioni/assenza trasparenza e riferimenti del manifest. L’aggiornamento di un’icona già installata dipende dal dispositivo; installazione su dispositivo fisico non verificata.
