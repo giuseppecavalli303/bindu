@@ -21,7 +21,7 @@
   --rose:#F5C4D8; --rose-ink:#A8457A;
   --lav:#CFCCF4; --lav-ink:#5650A6;
   --lilac:#E3CCF4; --lilac-ink:#8248AC;
-  --peach:#FCD9C7; --danger:#B4364F;
+  --peach:#FCD9C7; --peach-ink:#B0603A; --danger:#B4364F;
   --shadow:0 14px 34px -16px rgb(110 70 140 / .32);
   --scene-filter:none;
   --display:"Marcellus", "Cormorant Garamond", Georgia, serif;
@@ -30,12 +30,12 @@
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#1A1426; --surface:#251D34; --ink:#F2EAF8; --muted:#B8AAC9; --line:#3A2F4C; --on-soft:#2A1E3A;
   --rose:#E8A6C4; --rose-ink:#F5BCD5; --lav:#ABA6EC; --lav-ink:#C8C4F7; --lilac:#CAA8EC; --lilac-ink:#DDC4F6;
-  --peach:#F0C2AC; --danger:#F08A9E; --shadow:0 14px 34px -16px rgb(0 0 0 / .65); --scene-filter:brightness(.8) saturate(1.08); color-scheme:dark;
+  --peach:#F0C2AC; --peach-ink:#F7CDB6; --danger:#F08A9E; --shadow:0 14px 34px -16px rgb(0 0 0 / .65); --scene-filter:brightness(.8) saturate(1.08); color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#1A1426; --surface:#251D34; --ink:#F2EAF8; --muted:#B8AAC9; --line:#3A2F4C; --on-soft:#2A1E3A;
   --rose:#E8A6C4; --rose-ink:#F5BCD5; --lav:#ABA6EC; --lav-ink:#C8C4F7; --lilac:#CAA8EC; --lilac-ink:#DDC4F6;
-  --peach:#F0C2AC; --danger:#F08A9E; --shadow:0 14px 34px -16px rgb(0 0 0 / .65); --scene-filter:brightness(.8) saturate(1.08); color-scheme:dark;
+  --peach:#F0C2AC; --peach-ink:#F7CDB6; --danger:#F08A9E; --shadow:0 14px 34px -16px rgb(0 0 0 / .65); --scene-filter:brightness(.8) saturate(1.08); color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -46,7 +46,7 @@ p{margin:0} a{color:inherit} button,input,select,textarea{font:inherit;color:inh
 :focus-visible{outline:2px solid var(--sez, var(--lilac-ink));outline-offset:2px;border-radius:8px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .wrap{max-width:980px;margin:0 auto;width:100%;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
-.s-yoga{--sez:var(--rose-ink);--soft:var(--rose)} .s-post{--sez:var(--lav-ink);--soft:var(--lav)} .s-mind{--sez:var(--lilac-ink);--soft:var(--lilac)}
+.s-yoga{--sez:var(--rose-ink);--soft:var(--rose)} .s-post{--sez:var(--lav-ink);--soft:var(--lav)} .s-mind{--sez:var(--lilac-ink);--soft:var(--lilac)} .s-mov{--sez:var(--peach-ink);--soft:var(--peach)}
 
 /* Header */
 .top{position:fixed;top:0;left:0;right:0;z-index:8;padding-top:env(safe-area-inset-top,0px);color:var(--hdr, var(--ink));transition:background-color .35s, color .35s, box-shadow .35s}
@@ -347,6 +347,45 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 .pov .done{color:#F6EEFB;border-color:rgb(255 255 255 / .45)}
 .pov .done.on{background:#F6EEFB;color:#2B1F4A}
 .pov-foot a{color:#E6D3F6;font-size:.86rem}
+/* Registra una pratica */
+.lbl{font-size:.82rem;font-weight:700;color:var(--muted)}
+.att{display:grid;grid-template-columns:repeat(auto-fill, minmax(150px,1fr));gap:8px}
+.att label{position:relative;display:flex;align-items:center;gap:9px;padding:11px 12px;border:1px solid var(--line);border-radius:16px;cursor:pointer;font-weight:600;font-size:.9rem;background:var(--surface);line-height:1.25}
+.att input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.att label:has(input:checked){border-color:var(--sez);background:color-mix(in srgb, var(--soft) 45%, var(--surface));box-shadow:0 0 0 1px var(--sez)}
+.att label:has(input:focus-visible){outline:2px solid var(--sez);outline-offset:2px}
+.att .e{font-size:1.2rem;line-height:1}
+.durate{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.durate button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 13px;font-weight:600;font-size:.85rem;cursor:pointer}
+.durate button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.field .durate input{width:86px}
+.field textarea.corta{min-height:64px}
+.reg-cosa{font-weight:600}
+/* Cronometro di una pratica */
+.crono{position:fixed;z-index:9;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 84px);display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--sez);box-shadow:var(--shadow);width:max-content;max-width:calc(100% - 32px)}
+.crono .t{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.crono b{font-variant-numeric:tabular-nums;font-size:1.05rem;color:var(--sez)}
+.crono .btn{padding:7px 13px;font-size:.82rem;white-space:nowrap}
+@media (min-width:820px){ .crono{bottom:28px} }
+/* Invito del giorno */
+.invito{padding:22px 24px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--peach) 55%, var(--surface)), var(--surface) 70%)}
+.invito h2{font-size:clamp(1.4rem, 4vw, 1.7rem)}
+.invito p{max-width:60ch}
+/* Video rivisto */
+.ancora{border:0;background:none;color:var(--sez, var(--ink));font-weight:600;font-size:.82rem;cursor:pointer;padding:6px 4px;text-decoration:underline;text-underline-offset:3px}
+.pov .ancora{color:#F6EEFB}
+/* Diario del mese */
+.diario{width:100%;text-align:left}
+.diario summary small{margin-left:auto;color:var(--muted);font-weight:500;font-size:.82rem}
+.diario ul{list-style:none;margin:0;padding:0 16px 10px;display:flex;flex-direction:column}
+.diario li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:start;padding:11px 0;border-bottom:1px solid var(--line)}
+.diario li:last-child{border-bottom:0}
+.diario .dot{margin-top:6px}
+.diario .t{font-weight:600;font-size:.92rem;overflow-wrap:anywhere}
+.diario small{display:block;color:var(--muted);font-size:.78rem}
+.diario .nota{font-size:.85rem;color:var(--muted);font-style:italic;margin-top:3px;overflow-wrap:anywhere}
+.diario .acts{grid-column:2;display:flex;gap:6px;flex-wrap:wrap}
+.diario .acts .btn{padding:4px 10px;font-size:.76rem}
 /* Lezioni dell'anno */
 .anno{display:flex;flex-direction:column;gap:10px}
 .mese-lz summary{align-items:baseline}
@@ -404,6 +443,7 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 <button class="btn primary fab" id="fab" hidden>+ Aggiungi</button>
 <div id="sheet-host"></div>
 <div id="timer-host"></div>
+<div id="crono-host"></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -416,6 +456,17 @@ const SEZ = {
   mindfulness:{nome:'Mindfulness', cls:'s-mind', scena:'notte', sotto:'Meditazioni guidate e presenza'}
 };
 const TIPI = {tema:'Tema del mese', video:'Video lezione', articolo:'Articolo', audio:'Meditazione audio', diretta:'Lezione dal vivo'};
+const ATT = {
+  camminata:{nome:'Camminata', e:'🚶', sez:'movimento'},
+  sport:{nome:'Sport o movimento', e:'🏃', sez:'movimento'},
+  yoga:{nome:'Yoga per conto mio', e:'🧘', sez:'yoga'},
+  posturale:{nome:'Esercizi posturali', e:'🌿', sez:'posturale'},
+  meditazione:{nome:'Meditazione', e:'🪷', sez:'mindfulness'},
+  rivisto:{nome:'Ho rivisto una lezione', e:'▶️', sez:'yoga'},
+  altro:{nome:'Altro', e:'✍️', sez:'movimento'}
+};
+const COLORE = {yoga:'s-yoga', posturale:'s-post', mindfulness:'s-mind', movimento:'s-mov'};
+const NOME_SEZ = {yoga:'Yoga', posturale:'Posturale', mindfulness:'Mindfulness', movimento:'Movimento'};
 const LIVELLI = ['Tutti i livelli','Principianti','Intermedio','Avanzato'];
 const ICON = {
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg>',
@@ -525,6 +576,10 @@ const LZ = l => ({id:'lz-'+l.drive_id, tipo:'video', lezione:true, sezione:l.sez
 const lezDi = k => st.lezioni.filter(l => l.sezione===k && l.anno===annoScol(new Date()));
 const findItem = id => st.contenuti.find(c => c.id===id) || st.lezioni.find(l => l.id===id);
 const cap = t => String(t).charAt(0).toUpperCase() + String(t).slice(1);
+const isoDay = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const meseDi = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const durTxt = m => { m = Math.round(Number(m)||0); if(!m) return ''; const h = Math.floor(m/60), r = m%60; return h ? h+' h'+(r?' '+r+' min':'') : m+' min'; };
+function dataGiorno(at){ try{ return new Intl.DateTimeFormat('it-IT',{weekday:'short',day:'numeric',month:'short'}).format(new Date(at)).replace(/\./g,''); }catch(_){ return ''; } }
 const fmt = s => { s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,2800); }
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -541,10 +596,27 @@ function persist(id, on){
   if(!st.sb || !st.session) return;
   const v = st.done[id];
   st.pQueue = st.pQueue.then(async () => {
-    const r = on ? await st.sb.from('pratiche').insert({chiave:id, at:v.at, mese:v.mese, sezione:v.sezione, titolo:v.titolo})
+    const r = on ? await st.sb.from('pratiche').insert({chiave:id, at:v.at, mese:v.mese, sezione:v.sezione, titolo:v.titolo, minuti:v.minuti||null, tipo:v.tipo||null, nota:v.nota||null})
                  : await st.sb.from('pratiche').delete().eq('chiave', id);
     if(r.error && !(on && r.error.code==='23505')) toast('La pratica non è stata salvata. Controlla la connessione.');
   }).catch(() => toast('La pratica non è stata salvata. Controlla la connessione.'));
+}
+function persistUpdate(id){
+  saveLocal();
+  if(!st.sb || !st.session) return;
+  const v = st.done[id]; if(!v) return;
+  st.pQueue = st.pQueue.then(async () => {
+    const r = await st.sb.from('pratiche').update({at:v.at, mese:v.mese, minuti:v.minuti||null, nota:v.nota||null, titolo:v.titolo}).eq('chiave', id);
+    if(r.error) toast('La modifica non è stata salvata. Controlla la connessione.');
+  }).catch(() => toast('La modifica non è stata salvata. Controlla la connessione.'));
+}
+function nuovaPratica(key, v, msg){
+  st.done[key] = Object.assign({at:new Date().toISOString(), mese:curMonth()}, v);
+  persist(key, true); render(); toast(msg || 'Un nuovo anello nel tuo mandala');
+}
+function ripeti(id){
+  const x = findItem(id); if(!x) return;
+  nuovaPratica('rv-'+id+'-'+Date.now(), {sezione:SEZ[x.sezione]?x.sezione:'mindfulness', titolo:('Di nuovo: '+String(x.titolo||'')).slice(0,120), minuti:minuti(x.durata) ? Math.round(minuti(x.durata)) : null, tipo:'rivisto'}, 'Un altro anello nel tuo mandala');
 }
 function praticheMese(m=st.mese){
   if(st.done['sciolto-'+m]) return [];
@@ -554,7 +626,8 @@ function praticheMese(m=st.mese){
 function setDone(id, on, meta){
   if(on === !!st.done[id]) return false;
   if(on){ const x = meta || findItem(id) || {};
-    st.done[id] = {at:new Date().toISOString(), mese:curMonth(), sezione:SEZ[x.sezione]?x.sezione:'mindfulness', titolo:String(x.titolo||'').slice(0,120)}; }
+    const mn = x.minuti || minuti(x.durata);
+    st.done[id] = {at:new Date().toISOString(), mese:curMonth(), sezione:(SEZ[x.sezione] || x.sezione==='movimento')?x.sezione:'mindfulness', titolo:String(x.titolo||'').slice(0,120), minuti:mn ? Math.round(mn) : null, tipo:x.tipo||null}; }
   else delete st.done[id];
   persist(id, on); syncDoneButtons(id); render();
   if(on) toast('Un nuovo anello nel tuo mandala');
@@ -596,9 +669,12 @@ function drawMandala(cv, still){
   if(cv.width !== px){ cv.width = px; cv.height = px; }
   const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,W);
   const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
-  const COL = {yoga:[g('--rose'),g('--rose-ink')], posturale:[g('--lav'),g('--lav-ink')], mindfulness:[g('--lilac'),g('--lilac-ink')]};
+  const COL = {yoga:[g('--rose'),g('--rose-ink')], posturale:[g('--lav'),g('--lav-ink')], mindfulness:[g('--lilac'),g('--lilac-ink')], movimento:[g('--peach'),g('--peach-ink')]};
   const P = praticheMese(), n = P.length;
-  const R = W/2*.96, r0 = R*.15, N = Math.max(n, 6), step = (R-r0)/N;
+  // lo spessore di ogni anello segue la durata: 30 minuti = 1, da 0,45 a 1,8
+  const peso = p => { const m = Number(p.minuti); return m > 0 ? Math.min(1.8, Math.max(.45, m/30)) : 1; };
+  const pesi = P.map(peso), tot = Math.max(pesi.reduce((a,b) => a+b, 0), 6);
+  const R = W/2*.96, r0 = R*.15, unit = (R-r0)/tot; let acc = 0;
   const t = still ? 0 : performance.now()/1000;
   ctx.save(); ctx.translate(W/2, W/2);
   ctx.strokeStyle = g('--line'); ctx.lineWidth = 1; ctx.setLineDash([2,6]);
@@ -609,9 +685,9 @@ function drawMandala(cv, still){
     let k = 1;
     if(!still){ const age = Date.now() - Date.parse(p.at); k = Math.min(1, Math.max(0, age/1600)); k = 1-Math.pow(1-k,3); }
     const [soft, deep] = COL[p.sezione] || COL.mindfulness;
-    const r = r0 + step*(i+.5);
-    const count = Math.max(6, Math.round(2*Math.PI*r/(step*1.15)/6)*6);
-    const s = step*.5;
+    const band = pesi[i]*unit, r = r0 + acc + band/2; acc += band;
+    const count = Math.min(240, Math.max(6, Math.round(2*Math.PI*r/(band*1.15)/6)*6));
+    const s = band*.5;
     ctx.save();
     ctx.rotate((i%2 ? 1 : -1)*t*.025 + (i%2 ? Math.PI/count : 0));
     ctx.globalAlpha = k;
@@ -703,7 +779,9 @@ function tools(col, x){
     <button class="btn danger ${armed?'armed':''}" data-act="del" data-col="${col}" data-id="${esc(x.id)}">${armed?'Conferma eliminazione':'Elimina'}</button></div>`;
 }
 function metaLine(x){ const b=[]; if(x.durata) b.push(esc(x.durata)); if(x.tipo==='video' && x.livello) b.push(esc(x.livello)); return b.join(' · '); }
-function doneBtn(x, off, onL){ off = off || 'Ho praticato'; onL = onL || 'Praticato'; const on = !!st.done[x.id]; return `<button class="done ${on?'on':''}" data-act="done" data-id="${esc(x.id)}" data-off="${off}" data-on="${onL}" aria-pressed="${on}">${ICON.petal}<span>${on?onL:off}</span></button>`; }
+function doneBtn(x, off, onL){ off = off || 'Ho praticato'; onL = onL || 'Praticato'; const on = !!st.done[x.id];
+  const ancora = on && x.tipo!=='diretta' && x.tipo!=='articolo' && st.mese===MESE_OGGI ? `<button class="ancora" data-act="ancora" data-id="${esc(x.id)}" aria-label="Ho praticato di nuovo: ${esc(x.titolo)}">+ Di nuovo</button>` : '';
+  return `<button class="done ${on?'on':''}" data-act="done" data-id="${esc(x.id)}" data-off="${off}" data-on="${onL}" aria-pressed="${on}">${ICON.petal}<span>${on?onL:off}</span></button>${ancora}`; }
 function videoCard(x){
   const s = SEZ[x.sezione] || SEZ.yoga, link = safeLink(x.link); let media;
   if(x.file) media = `<div class="thumb vid"><video controls preload="metadata" playsinline data-id="${esc(x.id)}" src="${esc(st.urls[x.file]||'')}"></video></div>`;
@@ -753,7 +831,7 @@ function notices(){
   return '';
 }
 function mandalaCard(){
-  const P = praticheMese(), n = P.length, c = {yoga:0, posturale:0, mindfulness:0}, cal = calStrip();
+  const P = praticheMese(), n = P.length, c = {yoga:0, posturale:0, mindfulness:0, movimento:0}, cal = calStrip();
   P.forEach(p => c[p.sezione] = (c[p.sezione]||0)+1);
   const localNote = '';
   const sc = st.done['sciolto-'+st.mese];
@@ -768,14 +846,35 @@ function mandalaCard(){
   const attesa = (st.mese===MESE_OGGI && new Date().getDate() <= 3 && !st.done['sciolto-'+prev] && Object.entries(st.done).some(([k,v]) => v && v.mese===prev && !v.sciolto && !k.startsWith('sciolto-')))
     ? `<p class="hint">Il mandala di ${esc(meseNome(prev))} aspetta ancora di essere lasciato andare. <button class="linkish" type="button" data-act="vai-mese" data-id="${prev}">Vai a ${esc(meseNome(prev))}</button></p>` : '';
   const titolo = sc ? 'Tornato sabbia' : n===0 ? 'Sta per nascere' : n===1 ? 'Una pratica' : n+' pratiche';
-  const testo = sc ? 'Questo mandala è stato dissolto. Ogni mese ne nasce uno nuovo, a partire dal bindu.' : n===0 ? 'Al centro c\'è il bindu, il punto da cui tutto nasce. Guarda una lezione o ascolta una meditazione, poi premi «Ho praticato»: nascerà il primo anello.'
-    : 'Ogni pratica aggiunge un anello intorno al bindu. I colori raccontano come hai praticato questo mese.';
+  const testo = sc ? 'Questo mandala è stato dissolto. Ogni mese ne nasce uno nuovo, a partire dal bindu.' : n===0 ? 'Al centro c\'è il bindu, il punto da cui tutto nasce. Guarda una lezione, ascolta una meditazione oppure registra una camminata o una pratica fatta per conto tuo: nascerà il primo anello.'
+    : 'Ogni pratica aggiunge un anello intorno al bindu: il colore racconta cosa hai fatto, lo spessore quanto è durata.';
   return `<section class="card mandala"><div class="m-cv"><canvas id="mandala" role="img" aria-label="Il tuo mandala di ${esc(meseNome(st.mese))}: ${n} ${n===1?'pratica':'pratiche'}"></canvas></div>
     <div class="m-txt"><span class="eyebrow">Il tuo mandala di ${esc(meseNome(st.mese))}</span><h2>${titolo}</h2><p class="muted">${testo}</p>
-    <ul class="legend">${Object.entries(SEZ).map(([k,s]) => `<li class="${s.cls}"><span class="sw"></span>${s.nome}<b>${c[k]||0}</b></li>`).join('')}</ul>
+    <ul class="legend">${Object.entries(NOME_SEZ).map(([k,nm]) => `<li class="${COLORE[k]}"><span class="sw"></span>${nm}<b>${c[k]||0}</b></li>`).join('')}</ul>
     ${rito}${attesa}${cal.html}<p class="hint">${cal.giorni} ${cal.giorni===1?'giorno':'giorni'} di pratica${cal.serie>1 ? ` · ${cal.serie} giorni di fila` : ''}</p>
-    ${st.mese===MESE_OGGI ? `<div class="m-btns"><button class="btn primary" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">Pausa posturale · 2 min</button></div>` : ''}${localNote}</div></section>`;
+    ${st.mese===MESE_OGGI && !sc ? `<div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">Pausa posturale · 2 min</button></div>` : ''}${diario(P)}${localNote}</div></section>`;
 }
+
+function invito(){
+  if(st.mese!==MESE_OGGI || st.crono || st.done['sciolto-'+MESE_OGGI]) return '';
+  const oggi = isoDay(new Date());
+  if(praticheMese(MESE_OGGI).some(p => isoDay(new Date(p.at))===oggi)) return '';
+  const h = new Date().getHours();
+  const titolo = h < 12 ? 'Come vuoi iniziare la giornata?' : h < 18 ? 'Hai già fatto qualcosa per te, oggi?' : 'Prima di chiudere la giornata';
+  return `<section class="card invito s-mov"><div><span class="eyebrow">Oggi</span><h2>${titolo}</h2>
+    <p class="muted">Ogni pratica conta, non solo le lezioni: una camminata, qualche minuto sul tappetino, un respiro consapevole. Registrala e il tuo mandala cresce.</p></div>
+    <div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="cammina">🚶 Inizio a camminare</button></div></section>`;
+}
+function diario(P){
+  if(!P.length) return '';
+  const tot = P.reduce((a,p) => a + (Number(p.minuti)||0), 0);
+  const rows = P.slice().reverse().map(p => { const armed = st.armed==='pr/'+p.key;
+    return `<li class="${COLORE[p.sezione]||'s-mind'}"><span class="dot"></span><div><span class="t">${esc(p.titolo||'Pratica')}</span>
+      <small>${esc(dataGiorno(p.at))}${p.minuti ? ' · '+esc(durTxt(p.minuti)) : ''} · ${esc(NOME_SEZ[p.sezione]||'')}</small>${p.nota ? `<p class="nota">${esc(p.nota)}</p>` : ''}</div>
+      <div class="acts"><button class="btn" data-act="pr-edit" data-id="${esc(p.key)}">Modifica</button><button class="btn danger ${armed?'armed':''}" data-act="pr-del" data-id="${esc(p.key)}">${armed?'Conferma':'Togli'}</button></div></li>`; }).join('');
+  return `<details class="diario" ${st.diarioOpen?'open':''}><summary>Il diario di ${esc(meseNome(st.mese))} <small>${P.length} ${P.length===1?'pratica':'pratiche'}${tot ? ' · '+esc(durTxt(tot)) : ''}</small></summary><ul>${rows}</ul></details>`;
+}
+document.addEventListener('toggle', e => { if(e.target.classList && e.target.classList.contains('diario')) st.diarioOpen = e.target.open; }, true);
 
 function liveCard(x){
   const s = SEZ[x.sezione] || SEZ.yoga, d = new Date(x.quando), ok = !isNaN(d);
@@ -837,7 +936,7 @@ function viewHome(){
   return hero(kind, `<div class="hero-row"><div class="hero-txt"><span class="eyebrow">${esc(meseLabel(st.mese))}</span><h1>${saluto}</h1>
       <p class="sub">La pratica di questo mese ti aspetta: un tema per lo yoga, uno per la posturale e uno spazio di ascolto.</p></div>
       <div class="hero-orb breathe" aria-hidden="true"><div class="orb-wrap"><div class="orb"></div></div><span data-breath>Inspira</span><small>4 secondi dentro · 6 fuori</small></div></div>`)
-    + `<div class="wrap stack lift">${notices()}${mandalaCard()}${passateSec}${liveSec}<section class="sez-grid">${cards}</section>${breviSec}
+    + `<div class="wrap stack lift">${notices()}${invito()}${mandalaCard()}${passateSec}${liveSec}<section class="sez-grid">${cards}</section>${breviSec}
       <section class="group"><div class="group-head"><h2>Novità del mese</h2></div>${rec}</section></div>`;
 }
 function viewSezione(k){
@@ -933,7 +1032,8 @@ document.addEventListener('pause', e => { const m = e.target; if(!isMedia(m)) re
   const c = m.closest('.item'); if(c) c.classList.remove('is-playing');
   if(st.dirty && !m.ended && !isPlaying()) render(); }, true);
 document.addEventListener('ended', e => { const m = e.target; if(!isMedia(m)) return;
-  const changed = m.dataset.id ? setDone(m.dataset.id, true) : false;
+  const id = m.dataset.id; let changed = false;
+  if(id){ if(st.done[id]){ ripeti(id); changed = true; } else changed = setDone(id, true); }
   if(!changed && st.dirty) render(); }, true);
 document.addEventListener('timeupdate', e => { if(e.target.tagName==='AUDIO') updPlayer(e.target); }, true);
 document.addEventListener('loadedmetadata', e => { if(e.target.tagName==='AUDIO') updPlayer(e.target); }, true);
@@ -945,7 +1045,7 @@ function openPlayer(x){
   const link = safeLink(x.link), src = embedOf(link);
   if(!src){ if(link) window.open(link, '_blank', 'noopener'); return; }
   document.querySelectorAll('audio,video').forEach(m => { if(!m.paused) m.pause(); });
-  const s = SEZ[x.sezione] || SEZ.yoga; povItem = x;
+  const s = SEZ[x.sezione] || SEZ.yoga; povItem = Object.assign({}, x);
   $('#timer-host').innerHTML = `<div class="pov ${s.cls}" role="dialog" aria-modal="true" aria-labelledby="pov-t">${sceneSvg(s.scena)}
     <div class="pov-head"><div><span class="eyebrow">${esc(s.nome)}${x.durata?' · '+esc(x.durata):''}</span><h2 id="pov-t">${esc(x.titolo)}</h2></div><button class="btn ghost-l" id="pov-x">Chiudi</button></div>
     <div class="pov-frame"><iframe id="pov-f" src="${esc(src)}" title="${esc(x.titolo)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
@@ -955,7 +1055,7 @@ function openPlayer(x){
     try{
       if(/youtube/.test(src)){ f.contentWindow.postMessage(JSON.stringify({event:'listening', id:1, channel:'widget'}), '*');
         f.contentWindow.postMessage(JSON.stringify({event:'command', func:'addEventListener', args:['onStateChange'], id:1, channel:'widget'}), '*'); }
-      if(/vimeo/.test(src)) f.contentWindow.postMessage(JSON.stringify({method:'addEventListener', value:'ended'}), '*');
+      if(/vimeo/.test(src)){ f.contentWindow.postMessage(JSON.stringify({method:'addEventListener', value:'ended'}), '*'); f.contentWindow.postMessage(JSON.stringify({method:'addEventListener', value:'play'}), '*'); }
     }catch(_){}
   });
   $('#pov-x').addEventListener('click', closePlayer);
@@ -973,9 +1073,116 @@ window.addEventListener('message', e => {
   if(!povItem || !/^https:\/\/(www\.youtube-nocookie\.com|www\.youtube\.com|player\.vimeo\.com)$/.test(e.origin)) return;
   let d = e.data; if(typeof d==='string'){ try{ d = JSON.parse(d); }catch(_){ return; } }
   if(!d || typeof d!=='object') return;
-  const fine = (d.event==='onStateChange' && d.info===0) || (d.event==='infoDelivery' && d.info && d.info.playerState===0) || d.event==='ended';
-  if(fine && !st.done[povItem.id]) setDone(povItem.id, true, povItem);
+  const stato = d.event==='onStateChange' ? d.info : (d.event==='infoDelivery' && d.info) ? d.info.playerState : undefined;
+  if(stato===1 || d.event==='play'){ povItem._fine = false; return; }
+  if(!(stato===0 || d.event==='ended') || povItem._fine) return;
+  povItem._fine = true;
+  if(st.done[povItem.id]) ripeti(povItem.id); else setDone(povItem.id, true, povItem);
 });
+
+/* ---------- registra una pratica ---------- */
+const CRONO = 'bindu-crono-v1';
+function lezioniDaRivedere(){
+  const seen = new Set();
+  return [...st.lezioni.filter(l => l.anno===annoScol(new Date())), ...st.contenuti.filter(c => c.tipo==='video' || c.tipo==='audio').sort(byNew)]
+    .filter(x => !seen.has(x.id) && seen.add(x.id));
+}
+function openRegistra(key){
+  const ed = key ? st.done[key] : null; if(key && !ed) return;
+  const oggi = new Date(), minD = new Date(oggi.getFullYear(), oggi.getMonth()-1, 1);
+  const m0 = ed ? (ed.minuti || '') : 30;
+  const dur = [10,20,30,45,60,90].map(m => `<button type="button" data-min="${m}" class="${m===m0?'on':''}" aria-pressed="${m===m0}">${m<60 ? m+' min' : m===60 ? '1 ora' : '1 h 30'}</button>`).join('');
+  const lz = lezioniDaRivedere();
+  const scelta = ed ? `<p class="reg-cosa">${esc(ed.titolo||'Pratica')} <span class="muted">· ${esc(NOME_SEZ[ed.sezione]||'')}</span></p>`
+    : `<div class="field" role="radiogroup" aria-labelledby="reg-al"><span class="lbl" id="reg-al">Cosa hai fatto?</span><div class="att">${Object.entries(ATT).map(([k,a]) =>
+        `<label class="${COLORE[a.sez]}"><input type="radio" name="att" value="${k}" ${k==='camminata'?'checked':''}><span class="e" aria-hidden="true">${a.e}</span>${a.nome}</label>`).join('')}</div></div>
+      <div class="field" data-att="rivisto" hidden><label for="reg-lz">Quale lezione?</label><select id="reg-lz">${lz.map(x => `<option value="${esc(x.id)}">${esc(x.titolo)} · ${esc(NOME_SEZ[x.sezione]||'')}</option>`).join('')}<option value="">Un'altra lezione</option></select></div>
+      <div class="field" data-att="rivisto-sez" hidden><label for="reg-sez">Di quale sezione?</label><select id="reg-sez">${Object.entries(SEZ).map(([k,s]) => `<option value="${k}">${s.nome}</option>`).join('')}</select></div>
+      <div class="field" data-att="altro" hidden><label for="reg-cosa">Che cosa?</label><input id="reg-cosa" maxlength="80" placeholder="Pilates, danza, giardinaggio…"></div>`;
+  $('#sheet-host').innerHTML = `<div class="sheet-bg" id="reg-bg"><form class="sheet" id="reg-f" role="dialog" aria-modal="true" aria-labelledby="reg-t" novalidate>
+    <div class="sheet-head"><h2 id="reg-t">${ed ? 'Modifica la pratica' : 'Registra una pratica'}</h2><button type="button" class="btn" id="reg-x">Chiudi</button></div>
+    ${scelta}
+    <div class="field"><span class="lbl" id="reg-dl">Quanto è durata?</span><div class="durate" role="group" aria-labelledby="reg-dl">${dur}
+      <input type="number" id="reg-min" min="1" max="1440" inputmode="numeric" value="${esc(m0)}" aria-label="Minuti"><span class="muted">min</span></div></div>
+    <div class="field"><label for="reg-quando">Quando</label><input type="date" id="reg-quando" value="${isoDay(ed ? new Date(ed.at) : oggi)}" min="${isoDay(minD)}" max="${isoDay(oggi)}"></div>
+    <div class="field"><label for="reg-nota">Una nota per te (facoltativa)</label><textarea class="corta" id="reg-nota" maxlength="200" rows="2" placeholder="Com'è andata? Come ti senti?">${esc(ed && ed.nota || '')}</textarea></div>
+    <p class="form-err" id="reg-err" hidden></p>
+    <div class="sheet-actions">${ed ? '' : `<button type="button" class="btn" id="reg-start">Inizio adesso, col cronometro</button>`}<button class="btn primary" type="submit">${ed ? 'Salva' : 'Aggiungi al mandala'}</button></div>
+  </form></div>`;
+  const f = $('#reg-f');
+  const sync = () => {
+    const t = (f.querySelector('input[name=att]:checked')||{}).value;
+    f.querySelectorAll('[data-att]').forEach(el => { const a = el.dataset.att;
+      el.hidden = a==='rivisto-sez' ? !(t==='rivisto' && !$('#reg-lz').value) : a!==t; });
+    if(t){ const sez = t==='rivisto' ? (findItem($('#reg-lz').value)||{}).sezione || $('#reg-sez').value : ATT[t].sez; f.className = 'sheet '+(COLORE[sez]||''); }
+  };
+  f.addEventListener('change', sync); sync();
+  f.querySelector('.durate').addEventListener('click', e => { const b = e.target.closest('[data-min]'); if(!b) return; $('#reg-min').value = b.dataset.min; segnaDurata(); });
+  $('#reg-min').addEventListener('input', segnaDurata);
+  $('#reg-x').addEventListener('click', closeRegistra);
+  $('#reg-bg').addEventListener('click', e => { if(e.target.id==='reg-bg') closeRegistra(); });
+  if(!ed) $('#reg-start').addEventListener('click', avviaCrono);
+  f.addEventListener('submit', e => { e.preventDefault(); salvaRegistra(key); });
+  document.addEventListener('keydown', regKey);
+  setTimeout(() => { const el = f.querySelector('input[name=att]:checked') || $('#reg-min'); if(el) el.focus(); }, 30);
+}
+function segnaDurata(){ const v = $('#reg-min').value; document.querySelectorAll('.durate [data-min]').forEach(b => { const on = b.dataset.min===v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }); }
+function regKey(e){ if(e.key==='Escape') closeRegistra(); }
+function closeRegistra(){ $('#sheet-host').innerHTML = ''; document.removeEventListener('keydown', regKey); }
+function cosaRegistrata(){
+  const t = (document.querySelector('#reg-f input[name=att]:checked')||{}).value || 'altro';
+  if(t==='rivisto'){ const x = findItem($('#reg-lz').value);
+    return x ? {tipo:t, sezione:SEZ[x.sezione]?x.sezione:'mindfulness', titolo:('Di nuovo: '+x.titolo).slice(0,120)}
+             : {tipo:t, sezione:$('#reg-sez').value, titolo:'Lezione rivista'}; }
+  if(t==='altro') return {tipo:t, sezione:'movimento', titolo:($('#reg-cosa').value.trim() || 'Altro').slice(0,120)};
+  return {tipo:t, sezione:ATT[t].sez, titolo:ATT[t].nome};
+}
+function salvaRegistra(key){
+  const err = $('#reg-err'); err.hidden = true;
+  const min = Math.round(Number($('#reg-min').value));
+  if(!(min >= 1 && min <= 1440)){ err.textContent = 'Scrivi quanti minuti è durata, oppure scegli una durata.'; err.hidden = false; return; }
+  const q = $('#reg-quando').value, [y,m,d] = q.split('-').map(Number);
+  if(!y || !m || !d){ err.textContent = 'Scegli il giorno.'; err.hidden = false; return; }
+  const giorno = new Date(y, m-1, d, 12), oggi = isoDay(new Date());
+  if(q > oggi){ err.textContent = 'Il giorno non può essere nel futuro.'; err.hidden = false; return; }
+  const nota = $('#reg-nota').value.trim().slice(0,200) || null;
+  if(key){
+    const v = st.done[key]; if(!v) return closeRegistra();
+    v.minuti = min; v.nota = nota;
+    if(isoDay(new Date(v.at)) !== q){ v.at = (q===oggi ? new Date() : giorno).toISOString(); v.mese = meseDi(giorno); }
+    persistUpdate(key); closeRegistra(); render(); toast('Pratica aggiornata');
+    return;
+  }
+  const at = q===oggi ? new Date() : giorno;
+  nuovaPratica('lib-'+Date.now(), Object.assign(cosaRegistrata(), {minuti:min, nota, at:at.toISOString(), mese:meseDi(at)}));
+  closeRegistra();
+  if(meseDi(at) !== st.mese) toast('Aggiunta al mandala di '+meseNome(meseDi(at)));
+}
+/* il cronometro resta anche se l'app si chiude: l'inizio è salvato nel telefono */
+function leggiCrono(){ try{ const c = JSON.parse(localStorage.getItem(CRONO)||'null'); return c && c.inizio ? c : null; }catch(_){ return null; } }
+function avviaCrono(){
+  const c = Object.assign(cosaRegistrata(), {inizio:Date.now(), nota:$('#reg-nota').value.trim().slice(0,200) || null});
+  try{ localStorage.setItem(CRONO, JSON.stringify(c)); }catch(_){}
+  st.crono = c; closeRegistra(); renderCrono(); toast('Cronometro partito. Buona pratica');
+}
+function renderCrono(){
+  const host = $('#crono-host'), c = st.crono; clearInterval(st.cronoTick);
+  if(!c || !st.member){ host.innerHTML = ''; return; }
+  const armed = st.armed==='crono-x';
+  host.innerHTML = `<div class="crono ${COLORE[c.sezione]||'s-mov'}" role="status"><span class="t">${esc((ATT[c.tipo]||{}).e||'')} ${esc(c.titolo)}</span><b id="crono-t">0:00</b>
+    <button class="btn primary" data-act="crono-fine">Fine</button><button class="btn" data-act="crono-x" aria-label="Annulla il cronometro">${armed ? 'Sicura?' : '✕'}</button></div>`;
+  const tick = () => { const el = $('#crono-t'); if(!el) return; const s = Math.floor((Date.now()-c.inizio)/1000);
+    el.textContent = s >= 3600 ? Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0') : fmt(s); };
+  tick(); st.cronoTick = setInterval(tick, 1000);
+}
+function fineCrono(){
+  const c = st.crono; if(!c) return;
+  const min = Math.max(1, Math.min(1440, Math.round((Date.now()-c.inizio)/60000)));
+  st.crono = null; try{ localStorage.removeItem(CRONO); }catch(_){}
+  renderCrono();
+  nuovaPratica('lib-'+Date.now(), {tipo:c.tipo, sezione:c.sezione, titolo:c.titolo, nota:c.nota, minuti:min}, durTxt(min)+' nel tuo mandala');
+}
+st.crono = leggiCrono();
 
 /* ---------- timer di silenzio ---------- */
 function bell(vol){
@@ -1100,6 +1307,24 @@ document.addEventListener('click', async e => {
     if(x) openSheet(Object.assign({}, x, col==='temi'?{tipo:'tema'}:{}), true); }
   else if(act==='done') setDone(id, !st.done[id]);
   else if(act==='timer') openTimer();
+  else if(act==='registra') openRegistra();
+  else if(act==='ancora') ripeti(id);
+  else if(act==='pr-edit') openRegistra(id);
+  else if(act==='pr-del'){
+    const key = 'pr/'+id;
+    if(st.armed!==key){ st.armed=key; render(true); clearTimeout(st._arm); st._arm=setTimeout(() => { if(st.armed===key){ st.armed=null; render(); } },4000); return; }
+    st.armed = null; setDone(id, false); toast('Tolta dal mandala');
+  }
+  else if(act==='crono-fine'){ fineCrono(); }
+  else if(act==='cammina'){
+    st.crono = {tipo:'camminata', sezione:'movimento', titolo:'Camminata', nota:null, inizio:Date.now()};
+    try{ localStorage.setItem(CRONO, JSON.stringify(st.crono)); }catch(_){}
+    renderCrono(); render(); toast('Buona camminata. Premi Fine quando torni');
+  }
+  else if(act==='crono-x'){
+    if(st.armed!=='crono-x'){ st.armed='crono-x'; renderCrono(); clearTimeout(st._arm); st._arm=setTimeout(() => { if(st.armed==='crono-x'){ st.armed=null; renderCrono(); } },4000); return; }
+    st.armed = null; st.crono = null; try{ localStorage.removeItem(CRONO); }catch(_){} renderCrono(); toast('Cronometro annullato');
+  }
   else if(act==='watch'){ const x = findItem(id); if(x) openPlayer(x); }
   else if(act==='pausa') openPausa();
   else if(act==='sciogli'){
@@ -1382,7 +1607,7 @@ async function loadData(){
   const [t, c, p, lz] = await Promise.all([
     st.sb.from('temi').select('*'),
     st.sb.from('contenuti').select('*'),
-    st.sb.from('pratiche').select('chiave,at,mese,sezione,titolo'),
+    st.sb.from('pratiche').select('*'),
     st.sb.from('lezioni').select('drive_id,sezione,titolo,link,durata,mese,anno,caricata')
   ]);
   if(t.error || c.error){ st.offline = true; st.loading = false; render(); return; }
@@ -1390,14 +1615,14 @@ async function loadData(){
   st.temi = (t.data||[]).map(x => Object.assign({}, x, {approfondimenti: Array.isArray(x.approfondimenti) ? x.approfondimenti : []}));
   st.contenuti = c.data || [];
   if(!lz.error) st.lezioni = (lz.data||[]).map(LZ);
-  if(!p.error){ const d = {}; (p.data||[]).forEach(r => d[r.chiave] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo}); st.done = d; saveLocal(); }
+  if(!p.error){ const d = {}; (p.data||[]).forEach(r => d[r.chiave] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:r.tipo??null, nota:r.nota??null}); st.done = d; saveLocal(); }
   const paths = [...new Set(st.contenuti.map(x => x.file).filter(Boolean))];
   if(paths.length){
     const sg = await st.sb.storage.from('media').createSignedUrls(paths, 6*3600);
     if(!sg.error) (sg.data||[]).forEach(r => { const u = r.signedUrl || r.signedURL; if(u && r.path) st.urls[r.path] = u; });
   }
   if(st.canEdit){ const a = await st.sb.from('allieve').select('id,email,telefono,nome').order('nome', {nullsFirst:false}); if(!a.error) st.allieve = a.data || []; }
-  st.loading = false; render();
+  st.loading = false; render(); renderCrono();
 }
 let ultimoToken = null;
 async function onSession(session){

@@ -23,6 +23,7 @@ Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la u
 | Auth → URL Configuration | Site URL = indirizzo del sito qui sopra |
 | Email di accesso | SMTP personalizzato tramite Brevo (`smtp-relay.brevo.com`, porta 465, chiave SMTP dedicata "bindu2"; se la mail non parte e i log Auth dicono `535 Authentication failed`, la chiave in Supabase è sbagliata: generarne una nuova su Brevo e incollarla in Auth → SMTP Settings). Mittente verificato: Bindu `<yogacontiziana@gmail.com>`. Limite predefinito di 30 email l'ora (Auth → Rate Limits) |
 | Modelli email | "Magic link or OTP" e "Confirm sign up" sono in italiano, oggetto "Il tuo codice per entrare in Bindu", e contengono `{{ .Token }}` (il codice a 6 cifre) |
+| Pratiche libere | `supabase/05-pratiche-libere.sql` eseguito (colonne `minuti`, `tipo`, `nota`) |
 | Lezioni da Drive | `supabase/04-lezioni.sql` eseguito. Programma installato il 1° novembre 2026 nell'account Google di Tiziana: progetto Apps Script **Bindu Drive**, attivatore `sincronizza` ogni 10 minuti, proprietà `SUPABASE_KEY` = chiave secret "default" di Supabase. Se si cambia `google/bindu-drive.gs` va ricopiato anche nell'editor di Apps Script. Errori: Apps Script → Bindu Drive → Esecuzioni |
 | SMS / WhatsApp | Non attivi (`telefono: ''` in `config.js`) |
 
@@ -41,7 +42,7 @@ C'è anche una versione di prova dell'app pubblicata come Artifact su claude.ai,
 |---|---|
 | `temi` | Tema del mese per sezione (`yoga`, `posturale`, `mindfulness`), mese `AAAA-MM`, testo, `approfondimenti` (jsonb `[{titolo,testo}]`) |
 | `contenuti` | `tipo` = `video` / `audio` / `articolo` / `diretta`; `link` (es. Google Drive), `file` (percorso nel bucket privato `media`), `settimana` 1–4, `quando`/`dove` per le lezioni dal vivo |
-| `pratiche` | Le pratiche di ogni allieva (righe sue, `user_id = auth.uid()`). La chiave `sciolto-AAAA-MM` segna il mandala del mese dissolto |
+| `pratiche` | Le pratiche di ogni allieva (righe sue, `user_id = auth.uid()`). `sezione` = yoga / posturale / mindfulness / **movimento**; `minuti` (spessore dell'anello), `tipo` (camminata, sport, yoga, posturale, meditazione, rivisto, altro, oppure il tipo del contenuto), `nota`. Chiavi: id del contenuto, `lz-<drive_id>` per le lezioni da Drive, `lib-<ora>` per le pratiche registrate a mano, `rv-<id>-<ora>` per un video rivisto, `timer-<ora>`, `sciolto-AAAA-MM` per il mandala dissolto |
 | `lezioni` | Video da Drive: `drive_id`, `sezione` (yoga/posturale), `titolo`, `link`, `durata`, `mese`, `anno` scolastico (es. `2026-27`, cambia il 1° luglio), `caricata`. La scrive solo il programma Google; nell'app non si modifica |
 | `allieve`, `admins` | Elenco di accesso (email e/o telefono solo con le cifre, es. `393331234567`) |
 
@@ -49,7 +50,8 @@ I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`crea
 
 ## Idee centrali da rispettare
 
-- **Il mandala**: ogni pratica completata (video o audio finito, "Ho praticato", lezione dal vivo con "Ero presente", timer di silenzio, pausa posturale) aggiunge un anello intorno al bindu. Il colore dipende dalla sezione. Ogni mese ha il suo mandala, che riparte dal centro.
+- **Il mandala**: ogni pratica aggiunge un anello intorno al bindu: video o audio finito, "Ho praticato", lezione dal vivo con "Ero presente", timer di silenzio, pausa posturale, e anche le pratiche **fuori dalle lezioni** registrate dall'allieva ("Registra una pratica": camminata, sport, yoga o meditazione per conto suo, lezione rivista, altro; anche con cronometro, che resta attivo se l'app si chiude). Rivedere un video conta ogni volta ("+ Di nuovo"). Il **colore** dice cosa (rosa yoga, lavanda posturale, lilla mindfulness, pesca movimento), lo **spessore** quanto è durata (30 min = 1, da 0,45 a 1,8). Sotto il mandala c'è il diario del mese, dove si modifica o si toglie una pratica. Ogni mese ha il suo mandala, che riparte dal centro.
+- **Lo scopo**: invitare le allieve a restare attive ogni giorno, non solo durante le lezioni. Se oggi non c'è ancora una pratica, la home mostra un invito gentile con "Registra una pratica" e "Inizio a camminare". Il tono resta caldo, mai colpevolizzante.
 - **Il rito di fine mese**: negli ultimi 3 giorni del mese (o nei mesi passati) l'allieva può **dissolvere** il mandala con due tocchi. Animazione: la sabbia viene raccolta al centro e poi si disperde. Deve essere un gesto attivo dell'allieva, mai automatico. Il mandala era il tema della tesi di laurea dell'insegnante: va trattato con cura.
 - **L'anno scolastico**: va da ottobre a giugno. Luglio, agosto e settembre le lezioni registrate sono chiuse. Il 1° luglio inizia il nuovo anno scolastico (le lezioni caricate a settembre compaiono dal 1° ottobre).
 - **Grafica**: paesaggi pastello rosa e viola disegnati in SVG (alba = yoga, lago = posturale, notte = mindfulness), font Marcellus + Figtree, tema chiaro e scuro tramite variabili CSS in `:root`. Logo: fiore di loto sopra le vertebre (colonna e loto).

@@ -18,5 +18,6 @@ Come è stato messo online: [GUIDA.md](GUIDA.md). Per chi lavora sul codice, per
 | `supabase/01-struttura.sql` | Tabelle e regole di sicurezza |
 | `supabase/02-insegnante.sql` | Email dell'insegnante |
 | `supabase/03-esempi.sql` | Contenuti d'esempio (facoltativo) |
+| `supabase/05-pratiche-libere.sql` | Durata, tipo e nota delle pratiche (camminate, sport…) |
 | `supabase/04-lezioni.sql` | Tabella delle lezioni dell'anno da Drive |
 | `google/bindu-drive.gs` | Programma Google che porta in Bindu i video delle cartelle Drive |
