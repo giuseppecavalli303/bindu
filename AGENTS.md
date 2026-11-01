@@ -19,7 +19,7 @@ Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la u
 | Struttura dati | `supabase/01-struttura.sql`, `02-insegnante.sql` e `03-esempi.sql` sono già stati eseguiti |
 | Insegnante | Tiziana, `yogacontiziana@gmail.com` (tabella `admins`) |
 | Auth → URL Configuration | Site URL = indirizzo del sito qui sopra |
-| Email di accesso | SMTP personalizzato tramite Brevo (`smtp-relay.brevo.com`, porta 465, chiave SMTP dedicata "bindu"). Mittente verificato: Bindu `<yogacontiziana@gmail.com>`. Limite predefinito di 30 email l'ora (Auth → Rate Limits) |
+| Email di accesso | SMTP personalizzato tramite Brevo (`smtp-relay.brevo.com`, porta 465, chiave SMTP dedicata "bindu2"; se la mail non parte e i log Auth dicono `535 Authentication failed`, la chiave in Supabase è sbagliata: generarne una nuova su Brevo e incollarla in Auth → SMTP Settings). Mittente verificato: Bindu `<yogacontiziana@gmail.com>`. Limite predefinito di 30 email l'ora (Auth → Rate Limits) |
 | Modelli email | "Magic link or OTP" e "Confirm sign up" sono in italiano, oggetto "Il tuo codice per entrare in Bindu", e contengono `{{ .Token }}` (il codice a 6 cifre) |
 | SMS / WhatsApp | Non attivi (`telefono: ''` in `config.js`) |
 
