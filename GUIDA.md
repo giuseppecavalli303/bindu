@@ -89,6 +89,26 @@ Funziona, ma **ogni messaggio costa** (per un SMS in Italia indicativamente poch
 3. In `config.js` imposta `telefono: 'sms'` oppure `telefono: 'whatsapp'` e ricarica il file su GitHub.
 4. Da quel momento, aggiungendo un'allieva, tua moglie può scrivere anche il suo numero. Nella pagina di accesso compare la scelta Email / SMS (o WhatsApp).
 
+## 9. Lezioni dell'anno da Google Drive (automatico)
+
+Le lezioni registrate stanno su Google Drive, nelle cartelle **Lezioni di Yoga online** e **Lezioni di Posturale online** (anche dentro sottocartelle). Un piccolo programma, che gira nell'account Google dell'insegnante, ogni 10 minuti:
+
+- mette in Bindu i video nuovi, nella sezione **Lezioni dell'anno** di Yoga o Posturale, divisi per mese. Il titolo è il nome del file. Il mese è quello scritto nel nome (es. "Yoga ottobre '26"), altrimenti la data di caricamento;
+- toglie da Bindu i video cancellati o spostati;
+- da **ottobre a giugno** condivide con "chiunque abbia il link" solo i video dell'anno scolastico in corso, così si vedono dentro Bindu. A **luglio** li rende privati e Bindu li nasconde. A ottobre ricomincia con le lezioni nuove;
+- tiene private le due cartelle (si condividono solo i singoli video).
+
+Installazione, una volta sola:
+
+1. Esegui `supabase/04-lezioni.sql` nel SQL Editor di Supabase.
+2. Con l'account Google dell'insegnante apri <https://script.google.com> → **Nuovo progetto**. Chiamalo `Bindu Drive`.
+3. Cancella il contenuto di `Codice.gs` e incolla tutto il file `google/bindu-drive.gs`. Salva.
+4. **Impostazioni progetto** (ingranaggio) → **Proprietà script** → **Aggiungi proprietà**: nome `SUPABASE_KEY`, valore la chiave **secret** di Supabase (Project Settings → API Keys → Secret keys, inizia con `sb_secret_`). Salva. Questa chiave non va mai su GitHub.
+5. Torna all'editor, scegli la funzione **installa** e premi **Esegui**. Google chiede i permessi: accedi, **Avanzate → Vai a Bindu Drive** e **Consenti**.
+6. In **Esecuzioni** deve comparire "Completata". Nel registro c'è quanti video ha trovato per yoga e posturale.
+
+Se il nome di una cartella cambia, va cambiato anche in `CARTELLE` all'inizio del programma.
+
 ## Da sapere
 
 - **Pausa automatica**: un progetto Supabase gratuito che nessuno usa per 7 giorni viene messo in pausa. Basta rientrare su supabase.com e premere **Restore**. Se le allieve usano Bindu ogni settimana, non succede.

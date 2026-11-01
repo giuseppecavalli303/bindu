@@ -7,6 +7,8 @@ Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la u
 - **Un solo file**: `index.html` contiene HTML, CSS e JavaScript. Non ci sono build, framework o npm. Il sito è statico, pubblicato con GitHub Pages dal branch `main`.
 - **Database**: Supabase. Il client `supabase-js@2.45.4` arriva da jsDelivr, la configurazione da `config.js` (`window.BINDU_CONFIG`: URL, chiave anon/publishable, `telefono: '' | 'sms' | 'whatsapp'`).
 - **Accesso**: codice monouso a 6 cifre via email (`signInWithOtp` + `verifyOtp` con `type:'email'`), oppure via SMS/WhatsApp se attivato. Niente password. Per sicurezza la pagina accetta anche il link dell'email (`emailRedirectTo` = indirizzo del sito, `detectSessionInUrl`), ma le email configurate mandano il codice.
+- **Lezioni dell'anno**: i video delle cartelle Drive "Lezioni di Yoga online" e "Lezioni di Posturale online" li scrive nella tabella `lezioni` il programma `google/bindu-drive.gs` (Google Apps Script nell'account dell'insegnante, ogni 10 minuti, chiave `SUPABASE_KEY` nelle Proprietà script). Le allieve li vedono da ottobre a giugno e solo per l'anno scolastico in corso (regola RLS con `anno_scolastico()` e `lezioni_aperte()`). Lo stesso programma condivide i singoli video con link solo in quel periodo e li rende privati a luglio.
+- **Lettore interno**: i link di Google Drive, YouTube e Vimeo si aprono dentro Bindu (`embedOf()` e `openPlayer()` in `index.html`). Con YouTube e Vimeo la fine del video aggiunge da sola l'anello al mandala; con Drive l'allieva tocca "Ho praticato".
 - **Chi entra**: solo gli indirizzi nella tabella `allieve`, più le insegnanti nella tabella `admins`. Il controllo lo fanno le funzioni SQL `is_member()` e `is_admin()` e le regole RLS in `supabase/01-struttura.sql`.
 
 ## Stato attuale (novembre 2026)
@@ -21,6 +23,7 @@ Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la u
 | Auth → URL Configuration | Site URL = indirizzo del sito qui sopra |
 | Email di accesso | SMTP personalizzato tramite Brevo (`smtp-relay.brevo.com`, porta 465, chiave SMTP dedicata "bindu2"; se la mail non parte e i log Auth dicono `535 Authentication failed`, la chiave in Supabase è sbagliata: generarne una nuova su Brevo e incollarla in Auth → SMTP Settings). Mittente verificato: Bindu `<yogacontiziana@gmail.com>`. Limite predefinito di 30 email l'ora (Auth → Rate Limits) |
 | Modelli email | "Magic link or OTP" e "Confirm sign up" sono in italiano, oggetto "Il tuo codice per entrare in Bindu", e contengono `{{ .Token }}` (il codice a 6 cifre) |
+| Lezioni da Drive | `supabase/04-lezioni.sql` eseguito. Programma `google/bindu-drive.gs`: vedi GUIDA.md passo 9 per lo stato dell'installazione |
 | SMS / WhatsApp | Non attivi (`telefono: ''` in `config.js`) |
 
 C'è anche una versione di prova dell'app pubblicata come Artifact su claude.ai, con la stessa grafica, che salva i dati sulla piattaforma di Claude. **Il sito vero è questo repository.**
@@ -39,6 +42,7 @@ C'è anche una versione di prova dell'app pubblicata come Artifact su claude.ai,
 | `temi` | Tema del mese per sezione (`yoga`, `posturale`, `mindfulness`), mese `AAAA-MM`, testo, `approfondimenti` (jsonb `[{titolo,testo}]`) |
 | `contenuti` | `tipo` = `video` / `audio` / `articolo` / `diretta`; `link` (es. Google Drive), `file` (percorso nel bucket privato `media`), `settimana` 1–4, `quando`/`dove` per le lezioni dal vivo |
 | `pratiche` | Le pratiche di ogni allieva (righe sue, `user_id = auth.uid()`). La chiave `sciolto-AAAA-MM` segna il mandala del mese dissolto |
+| `lezioni` | Video da Drive: `drive_id`, `sezione` (yoga/posturale), `titolo`, `link`, `durata`, `mese`, `anno` scolastico (es. `2026-27`, cambia il 1° luglio), `caricata`. La scrive solo il programma Google; nell'app non si modifica |
 | `allieve`, `admins` | Elenco di accesso (email e/o telefono solo con le cifre, es. `393331234567`) |
 
 I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`createSignedUrls`, validi 6 ore).
@@ -47,6 +51,7 @@ I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`crea
 
 - **Il mandala**: ogni pratica completata (video o audio finito, "Ho praticato", lezione dal vivo con "Ero presente", timer di silenzio, pausa posturale) aggiunge un anello intorno al bindu. Il colore dipende dalla sezione. Ogni mese ha il suo mandala, che riparte dal centro.
 - **Il rito di fine mese**: negli ultimi 3 giorni del mese (o nei mesi passati) l'allieva può **dissolvere** il mandala con due tocchi. Animazione: la sabbia viene raccolta al centro e poi si disperde. Deve essere un gesto attivo dell'allieva, mai automatico. Il mandala era il tema della tesi di laurea dell'insegnante: va trattato con cura.
+- **L'anno scolastico**: va da ottobre a giugno. Luglio, agosto e settembre le lezioni registrate sono chiuse. Il 1° luglio inizia il nuovo anno scolastico (le lezioni caricate a settembre compaiono dal 1° ottobre).
 - **Grafica**: paesaggi pastello rosa e viola disegnati in SVG (alba = yoga, lago = posturale, notte = mindfulness), font Marcellus + Figtree, tema chiaro e scuro tramite variabili CSS in `:root`. Logo: fiore di loto sopra le vertebre (colonna e loto).
 - **Lingua**: interfaccia in italiano, tono caldo e semplice.
 

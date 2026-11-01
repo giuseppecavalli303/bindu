@@ -332,6 +332,27 @@ details .prose{padding:0 16px 16px}
 .btn.glow{background:#F6EEFB;color:#2B1F4A;border-color:#F6EEFB}
 .btn.ghost-l{background:transparent;color:#F6EEFB;border-color:rgb(255 255 255 / .45)}
 
+/* Lettore video interno */
+button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.pov{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#F6EEFB;isolation:isolate;overflow:auto;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px, env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px, env(safe-area-inset-left,0px))}
+.pov .scene{position:fixed;z-index:-2;filter:none}
+.pov::before{content:"";position:fixed;inset:0;z-index:-1;background:rgb(24 14 38 / .58)}
+.pov-head,.pov-foot{width:min(100%, 960px);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pov-head > div{min-width:0;flex:1}
+.pov .eyebrow{color:#E6D3F6}
+.pov-head h2{font-size:1.4rem;color:#F6EEFB;overflow-wrap:anywhere}
+.pov-frame{width:min(100%, 960px, calc((100dvh - 200px) * 16 / 9));aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 24px 60px -20px rgb(0 0 0 / .65);flex:none}
+.pov-frame iframe{width:100%;height:100%;border:0;display:block}
+.pov .done{color:#F6EEFB;border-color:rgb(255 255 255 / .45)}
+.pov .done.on{background:#F6EEFB;color:#2B1F4A}
+.pov-foot a{color:#E6D3F6;font-size:.86rem}
+/* Lezioni dell'anno */
+.anno{display:flex;flex-direction:column;gap:10px}
+.mese-lz summary{align-items:baseline}
+.mese-lz summary small{margin-left:auto;color:var(--muted);font-weight:500;font-size:.82rem}
+.mese-lz .list{padding:4px 12px 14px}
+
 /* Sheet */
 .sheet-bg{position:fixed;inset:0;z-index:30;background:rgb(30 18 44 / .5);display:flex;align-items:flex-end;justify-content:center}
 @media (min-width:820px){ .sheet-bg{align-items:center} }
@@ -461,7 +482,7 @@ function sceneSvg(kind){
 const curMonth = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
 const MESE_OGGI = curMonth();
 const LS = 'pdm-pratica-v1';
-const st = {temi:[], contenuti:[], mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
+const st = {temi:[], contenuti:[], lezioni:[], mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
   loading:true, offline:false, armed:null, done:{}, uid:null, pRef:null, pLoaded:false, localOnly:false,
   pQueue:Promise.resolve(), dirty:false, tmin:10, scene:'alba',
   sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[],
@@ -485,6 +506,25 @@ function linkHost(u){
   if(/vimeo\.com$/.test(h)) return 'Vimeo';
   return '';
 }
+function embedOf(u){
+  let x; try{ x = new URL(u); }catch(_){ return ''; }
+  if(x.protocol !== 'https:') return '';
+  const h = x.hostname.replace(/^(www|m)\./,''), p = x.pathname; let m, id = '';
+  if(/(^|\.)drive\.google\.com$/.test(h)){ m = p.match(/\/file\/d\/([\w-]{10,})/); id = m ? m[1] : (x.searchParams.get('id')||'');
+    return /^[\w-]{10,}$/.test(id) ? 'https://drive.google.com/file/d/'+id+'/preview' : ''; }
+  if(h==='youtu.be'){ m = p.match(/^\/([\w-]{6,})/); id = m ? m[1] : ''; }
+  else if(/(^|\.)youtube(-nocookie)?\.com$/.test(h)){ m = p.match(/^\/(?:embed|shorts|live)\/([\w-]{6,})/); id = m ? m[1] : (x.searchParams.get('v')||''); }
+  if(id) return /^[\w-]{6,}$/.test(id) ? 'https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&playsinline=1&enablejsapi=1&origin='+encodeURIComponent(location.origin) : '';
+  if(/(^|\.)vimeo\.com$/.test(h)){ m = p.match(/\/(\d{6,})(?:\/([\da-f]{6,}))?/); if(!m) return '';
+    const hash = m[2] || x.searchParams.get('h') || ''; return 'https://player.vimeo.com/video/'+m[1]+'?autoplay=1&dnt=1'+(/^[\da-f]+$/.test(hash)?'&h='+hash:''); }
+  return '';
+}
+function annoScol(d){ const m = d.getMonth()+1, y = d.getFullYear(), a = m>=7 ? y : y-1; return a+'-'+String((a+1)%100).padStart(2,'0'); }
+const lezioniAperte = () => ![7,8,9].includes(new Date().getMonth()+1);
+const LZ = l => ({id:'lz-'+l.drive_id, tipo:'video', lezione:true, sezione:l.sezione, titolo:l.titolo, durata:l.durata, link:l.link, mese:l.mese, anno:l.anno, creato:l.caricata});
+const lezDi = k => st.lezioni.filter(l => l.sezione===k && l.anno===annoScol(new Date()));
+const findItem = id => st.contenuti.find(c => c.id===id) || st.lezioni.find(l => l.id===id);
+const cap = t => String(t).charAt(0).toUpperCase() + String(t).slice(1);
 const fmt = s => { s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,2800); }
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -513,7 +553,7 @@ function praticheMese(m=st.mese){
 }
 function setDone(id, on, meta){
   if(on === !!st.done[id]) return false;
-  if(on){ const x = meta || st.contenuti.find(c => c.id===id) || {};
+  if(on){ const x = meta || findItem(id) || {};
     st.done[id] = {at:new Date().toISOString(), mese:curMonth(), sezione:SEZ[x.sezione]?x.sezione:'mindfulness', titolo:String(x.titolo||'').slice(0,120)}; }
   else delete st.done[id];
   persist(id, on); syncDoneButtons(id); render();
@@ -657,7 +697,7 @@ function hero(kind, inner, cls){
 }
 const badge = x => x.esempio ? ' <span class="badge">Esempio</span>' : '';
 function tools(col, x){
-  if(!st.canEdit) return '';
+  if(!st.canEdit || x.lezione) return '';
   const armed = st.armed === col+'/'+x.id;
   return `<div class="tools"><button class="btn" data-act="edit" data-col="${col}" data-id="${esc(x.id)}">Modifica</button>
     <button class="btn danger ${armed?'armed':''}" data-act="del" data-col="${col}" data-id="${esc(x.id)}">${armed?'Conferma eliminazione':'Elimina'}</button></div>`;
@@ -667,6 +707,7 @@ function doneBtn(x, off, onL){ off = off || 'Ho praticato'; onL = onL || 'Pratic
 function videoCard(x){
   const s = SEZ[x.sezione] || SEZ.yoga, link = safeLink(x.link); let media;
   if(x.file) media = `<div class="thumb vid"><video controls preload="metadata" playsinline data-id="${esc(x.id)}" src="${esc(st.urls[x.file]||'')}"></video></div>`;
+  else if(link && embedOf(link)) media = `<button class="thumb" data-act="watch" data-id="${esc(x.id)}" aria-label="Guarda ${esc(x.titolo)}">${sceneSvg(s.scena)}<span class="playc" aria-hidden="true">${ICON.play}</span><span class="lbl">Guarda la lezione</span></button>`;
   else if(link){ const h = linkHost(link); media = `<a class="thumb" href="${esc(link)}" target="_blank" rel="noopener" aria-label="Guarda ${esc(x.titolo)}${h?' su '+h:''}">${sceneSvg(s.scena)}<span class="playc" aria-hidden="true">${ICON.play}</span><span class="lbl">${h?'Guarda su '+h:'Guarda la lezione'} ↗</span></a>`; }
   else media = `<div class="thumb">${sceneSvg(s.scena)}<span class="lbl">Registrazione in arrivo</span></div>`;
   return `<article class="card item ${s.cls}" data-card="${esc(x.id)}">${media}<div class="body"><div class="meta">${metaLine(x)}${badge(x)}</div>
@@ -677,6 +718,7 @@ function audioCard(x){
   if(x.file) media = `<div class="thumb">${sceneSvg(s.scena)}<button class="playc" data-act="play" data-id="${id}" aria-label="Ascolta ${esc(x.titolo)}">${ICON.play}${ICON.pause}</button></div>
     <div class="player"><div class="prog" data-act="seek" data-id="${id}" role="presentation"><i></i></div><span class="time">0:00${x.durata?' / '+esc(x.durata):''}</span>
     <audio id="au-${id}" data-id="${id}" preload="metadata" src="${esc(st.urls[x.file]||'')}"></audio></div>`;
+  else if(link && embedOf(link)) media = `<button class="thumb" data-act="watch" data-id="${id}" aria-label="Ascolta ${esc(x.titolo)}">${sceneSvg(s.scena)}<span class="playc" aria-hidden="true">${ICON.play}</span><span class="lbl">Ascolta</span></button>`;
   else if(link){ const h = linkHost(link); media = `<a class="thumb" href="${esc(link)}" target="_blank" rel="noopener" aria-label="Ascolta ${esc(x.titolo)}${h?' su '+h:''}">${sceneSvg(s.scena)}<span class="playc" aria-hidden="true">${ICON.play}</span><span class="lbl">${h?'Ascolta su '+h:'Ascolta'} ↗</span></a>`; }
   else media = `<div class="thumb">${sceneSvg(s.scena)}<span class="lbl">Audio in arrivo</span></div>`;
   return `<article class="card item ${s.cls}" data-card="${esc(x.id)}">${media}<div class="body"><div class="meta">${metaLine(x)}${badge(x)}</div>
@@ -687,6 +729,18 @@ function articleCard(x, showSez){
   return `<article class="card item ${s.cls}"><div class="body"><div class="meta">${showSez?`<span class="chip">${esc(s.nome)}</span>`:''}${badge(x)}</div>
     <h3>${esc(x.titolo)}</h3>${x.descrizione?`<p class="desc">${esc(x.descrizione)}</p>`:''}
     <div class="foot"><a class="read" href="#a-${esc(x.id)}">Leggi l'articolo →</a></div>${tools('contenuti',x)}</div></article>`;
+}
+function lezAnno(k){
+  const items = lezDi(k), cartella = k==='yoga' ? 'Lezioni di Yoga online' : 'Lezioni di Posturale online';
+  if(!items.length && !st.canEdit) return '';
+  const nota = st.canEdit
+    ? `<p class="muted">Arrivano da sole dalla cartella «${cartella}» su Google Drive.${lezioniAperte() ? '' : ' Ora le allieve non le vedono: tornano visibili il 1° ottobre.'}</p>`
+    : `<span class="muted">Tutte le lezioni da ottobre a giugno</span>`;
+  const mesi = [...new Set(items.map(l => l.mese))].sort().reverse();
+  const body = items.length ? mesi.map((m,i) => { const its = items.filter(l => l.mese===m).sort(byNew);
+      return `<details class="mese-lz" ${i===0?'open':''}><summary>${esc(cap(meseLabel(m)))} <small>${its.length} ${its.length===1?'lezione':'lezioni'}</small></summary><div class="list">${its.map(videoCard).join('')}</div></details>`; }).join('')
+    : `<div class="empty">Per ora non ci sono lezioni di quest'anno nella cartella.</div>`;
+  return `<section class="group"><div class="group-head"><h2>Lezioni dell'anno</h2>${nota}</div><div class="anno">${body}</div></section>`;
 }
 const addBtn = (tipo, sez, label) => st.canEdit ? `<button class="btn" data-act="new" data-tipo="${tipo}" data-sez="${sez||''}">${label}</button>` : '';
 function group(title, items, fn, emptyMsg, tipo, sez){
@@ -759,8 +813,8 @@ function viewHome(){
   const kind = (h<6||h>=21) ? 'notte' : h<11 ? 'alba' : h<17 ? 'lago' : 'tramonto';
   const saluto = h<5 ? 'Buonanotte' : h<13 ? 'Buongiorno' : h<18 ? 'Buon pomeriggio' : 'Buonasera';
   const cards = Object.entries(SEZ).map(([k,s]) => {
-    const temi = temiDi(k), v = contDi(k,'video').length, a = contDi(k,'audio').length, ar = contDi(k,'articolo').length;
-    const cnt = [v&&`${v} video`, a&&`${a} ${a===1?'meditazione':'meditazioni'}`, ar&&`${ar} ${ar===1?'articolo':'articoli'}`].filter(Boolean).join(' · ') || 'Contenuti in preparazione';
+    const temi = temiDi(k), v = contDi(k,'video').length, a = contDi(k,'audio').length, ar = contDi(k,'articolo').length, lz = lezDi(k).length;
+    const cnt = [v&&`${v} video`, lz&&`${lz} ${lz===1?'lezione':'lezioni'} dell'anno`, a&&`${a} ${a===1?'meditazione':'meditazioni'}`, ar&&`${ar} ${ar===1?'articolo':'articoli'}`].filter(Boolean).join(' · ') || 'Contenuti in preparazione';
     return `<a class="card sez-card ${s.cls}" href="#${k}"><div class="thumb">${sceneSvg(s.scena)}</div><div class="body"><span class="eyebrow">${esc(s.nome)}</span>
       <h2>${temi.length ? temi.map(t => esc(t.titolo)).join(' · ') : 'Tema in preparazione'}</h2>
       ${temi[0] && temi[0].sottotitolo ? `<p class="muted">${esc(temi[0].sottotitolo)}</p>` : ''}<span class="count">${cnt}</span></div></a>`;
@@ -808,12 +862,12 @@ function viewSezione(k){
   const gL = (live.length || st.canEdit) ? `<section class="group"><div class="group-head"><h2>Dal vivo</h2>${addBtn('diretta',k,'+ Lezione dal vivo')}</div>
     ${live.length ? `<div class="lives">${live.map(liveCard).join('')}</div>` : `<div class="empty">Nessuna lezione in calendario.</div>`}</section>` : '';
   const video = contDi(k,'video'), audio = contDi(k,'audio'), art = contDi(k,'articolo');
-  const gV = group('Lezioni del mese', video, videoCard, k!=='mindfulness' ? 'Le registrazioni delle lezioni di questo mese appariranno qui.' : '', 'video', k);
+  const gV = group('Lezioni del mese', video, videoCard, k!=='mindfulness' && !lezDi(k).length ? 'Le registrazioni delle lezioni di questo mese appariranno qui.' : '', 'video', k);
   const gA = group('Meditazioni guidate', audio, audioCard, k==='mindfulness' ? 'Le meditazioni guidate di questo mese appariranno qui.' : '', 'audio', k);
   const gB = group('Dal blog', art, x => articleCard(x,false), '', 'articolo', k);
   return hero(s.scena, `<div class="hero-row"><div class="hero-txt"><span class="eyebrow">${esc(s.nome)} · ${esc(meseLabel(st.mese))}</span>
       <h1>${titolo}</h1><p class="sub">${esc(sub)}</p>${addBtn('tema',k,'+ Tema del mese')}</div>${orb}</div>`)
-    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${percorso(k)}${timerCard}${pausaCard}${k==='mindfulness' ? gA+gV+gL+gB : gV+gA+gL+gB}</div>`;
+    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${percorso(k)}${timerCard}${pausaCard}${k==='mindfulness' ? gA+gV+gL+gB : gV+lezAnno(k)+gA+gL+gB}</div>`;
 }
 function viewBlog(){
   const art = contDi(null,'articolo');
@@ -884,6 +938,44 @@ document.addEventListener('ended', e => { const m = e.target; if(!isMedia(m)) re
 document.addEventListener('timeupdate', e => { if(e.target.tagName==='AUDIO') updPlayer(e.target); }, true);
 document.addEventListener('loadedmetadata', e => { if(e.target.tagName==='AUDIO') updPlayer(e.target); }, true);
 document.addEventListener('error', e => { const m = e.target; if(!isMedia(m)) return; const c = m.closest('.item'); const tm = c && c.querySelector('.time'); if(tm) tm.textContent = 'File non disponibile'; }, true);
+
+/* ---------- lettore video interno (Drive, YouTube, Vimeo) ---------- */
+let povItem = null;
+function openPlayer(x){
+  const link = safeLink(x.link), src = embedOf(link);
+  if(!src){ if(link) window.open(link, '_blank', 'noopener'); return; }
+  document.querySelectorAll('audio,video').forEach(m => { if(!m.paused) m.pause(); });
+  const s = SEZ[x.sezione] || SEZ.yoga; povItem = x;
+  $('#timer-host').innerHTML = `<div class="pov ${s.cls}" role="dialog" aria-modal="true" aria-labelledby="pov-t">${sceneSvg(s.scena)}
+    <div class="pov-head"><div><span class="eyebrow">${esc(s.nome)}${x.durata?' · '+esc(x.durata):''}</span><h2 id="pov-t">${esc(x.titolo)}</h2></div><button class="btn ghost-l" id="pov-x">Chiudi</button></div>
+    <div class="pov-frame"><iframe id="pov-f" src="${esc(src)}" title="${esc(x.titolo)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <div class="pov-foot">${doneBtn(x)}<a href="${esc(link)}" target="_blank" rel="noopener">Non parte? Apri ${linkHost(link) ? 'su '+esc(linkHost(link)) : 'in una nuova pagina'} ↗</a></div></div>`;
+  const f = $('#pov-f');
+  f.addEventListener('load', () => {
+    try{
+      if(/youtube/.test(src)){ f.contentWindow.postMessage(JSON.stringify({event:'listening', id:1, channel:'widget'}), '*');
+        f.contentWindow.postMessage(JSON.stringify({event:'command', func:'addEventListener', args:['onStateChange'], id:1, channel:'widget'}), '*'); }
+      if(/vimeo/.test(src)) f.contentWindow.postMessage(JSON.stringify({method:'addEventListener', value:'ended'}), '*');
+    }catch(_){}
+  });
+  $('#pov-x').addEventListener('click', closePlayer);
+  document.addEventListener('keydown', povKey);
+  document.documentElement.style.overflow = 'hidden';
+  setTimeout(() => { const b = $('#pov-x'); if(b) b.focus(); }, 30);
+}
+function povKey(e){ if(e.key==='Escape') closePlayer(); }
+function closePlayer(){
+  povItem = null; $('#timer-host').innerHTML = ''; document.removeEventListener('keydown', povKey);
+  document.documentElement.style.overflow = ''; if(st.dirty) render();
+}
+// YouTube e Vimeo dicono quando il video è finito: l'anello arriva da solo.
+window.addEventListener('message', e => {
+  if(!povItem || !/^https:\/\/(www\.youtube-nocookie\.com|www\.youtube\.com|player\.vimeo\.com)$/.test(e.origin)) return;
+  let d = e.data; if(typeof d==='string'){ try{ d = JSON.parse(d); }catch(_){ return; } }
+  if(!d || typeof d!=='object') return;
+  const fine = (d.event==='onStateChange' && d.info===0) || (d.event==='infoDelivery' && d.info && d.info.playerState===0) || d.event==='ended';
+  if(fine && !st.done[povItem.id]) setDone(povItem.id, true, povItem);
+});
 
 /* ---------- timer di silenzio ---------- */
 function bell(vol){
@@ -1008,6 +1100,7 @@ document.addEventListener('click', async e => {
     if(x) openSheet(Object.assign({}, x, col==='temi'?{tipo:'tema'}:{}), true); }
   else if(act==='done') setDone(id, !st.done[id]);
   else if(act==='timer') openTimer();
+  else if(act==='watch'){ const x = findItem(id); if(x) openPlayer(x); }
   else if(act==='pausa') openPausa();
   else if(act==='sciogli'){
     if(st.armed!=='sciogli'){ st.armed='sciogli'; render(true); clearTimeout(st._arm); st._arm=setTimeout(() => { if(st.armed==='sciogli'){ st.armed=null; render(); } },6000); return; }
@@ -1286,15 +1379,17 @@ async function inviaCodice(canale, dest, ancora){
 async function loadData(){
   if(!st.sb || !st.session || !st.member) return;
   st.lastLoad = Date.now();
-  const [t, c, p] = await Promise.all([
+  const [t, c, p, lz] = await Promise.all([
     st.sb.from('temi').select('*'),
     st.sb.from('contenuti').select('*'),
-    st.sb.from('pratiche').select('chiave,at,mese,sezione,titolo')
+    st.sb.from('pratiche').select('chiave,at,mese,sezione,titolo'),
+    st.sb.from('lezioni').select('drive_id,sezione,titolo,link,durata,mese,anno,caricata')
   ]);
   if(t.error || c.error){ st.offline = true; st.loading = false; render(); return; }
   st.offline = false;
   st.temi = (t.data||[]).map(x => Object.assign({}, x, {approfondimenti: Array.isArray(x.approfondimenti) ? x.approfondimenti : []}));
   st.contenuti = c.data || [];
+  if(!lz.error) st.lezioni = (lz.data||[]).map(LZ);
   if(!p.error){ const d = {}; (p.data||[]).forEach(r => d[r.chiave] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo}); st.done = d; saveLocal(); }
   const paths = [...new Set(st.contenuti.map(x => x.file).filter(Boolean))];
   if(paths.length){
