@@ -4,8 +4,8 @@
 // di sicurezza del database. NON incollare mai qui la chiave "service_role" / "secret".
 
 window.BINDU_CONFIG = {
-  supabaseUrl: 'INSERISCI-QUI-PROJECT-URL',          // es. 'https://abcdefgh.supabase.co'
-  supabaseAnonKey: 'INSERISCI-QUI-LA-CHIAVE-ANON',   // una riga lunga che inizia con 'eyJ' oppure 'sb_publishable_'
+  supabaseUrl: 'https://muakbnnfscwciogulmqt.supabase.co',          // es. 'https://abcdefgh.supabase.co'
+  supabaseAnonKey: 'sb_publishable_WzlI0_oib_6AJhBotkad_A_kUZsINNa',   // una riga lunga che inizia con 'eyJ' oppure 'sb_publishable_'
 
   // Codice anche via telefono: lascia '' (solo email), oppure 'sms' o 'whatsapp'
   // dopo aver collegato Twilio in Supabase (GUIDA.md, passo 8).
