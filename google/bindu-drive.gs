@@ -184,3 +184,148 @@ function supabase(chiave, metodo, percorso, corpo, extra) {
   if (r.getResponseCode() >= 300) throw new Error('Supabase ' + r.getResponseCode() + ': ' + r.getContentText());
   return r;
 }
+
+/* =====================================================================
+ * La mail della domenica: a ogni allieva, come sta crescendo il suo mandala
+ * ===================================================================== */
+
+const SITO = 'https://giuseppecavalli303.github.io/bindu/';
+const INSEGNANTE = 'yogacontiziana@gmail.com';
+const TINTE = {
+  yoga:        { nome: 'Yoga',        chiaro: '#F5C4D8', scuro: '#A8457A' },
+  posturale:   { nome: 'Posturale',   chiaro: '#CFCCF4', scuro: '#5650A6' },
+  mindfulness: { nome: 'Mindfulness', chiaro: '#E3CCF4', scuro: '#8248AC' },
+  movimento:   { nome: 'Movimento',   chiaro: '#FCD9C7', scuro: '#B0603A' }
+};
+
+/** Da eseguire UNA volta: la mail parte ogni domenica verso le 18. */
+function installaMail() {
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'mailSettimanale')
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('mailSettimanale').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(18).create();
+  console.log('Mail della domenica attivata.');
+}
+
+/** Ferma la mail della domenica. */
+function fermaMail() {
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'mailSettimanale')
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  console.log('Mail della domenica fermata.');
+}
+
+function mailSettimanale() { inviaRiepiloghi(false); }
+
+/** Prova: manda solo all'insegnante le mail (al massimo 3) come le riceverebbero le allieve. */
+function anteprimaMail() { inviaRiepiloghi(true); }
+
+function inviaRiepiloghi(prova) {
+  const chiave = (PropertiesService.getScriptProperties().getProperty('SUPABASE_KEY') || '').replace(/\s+/g, '');
+  if (!chiave) throw new Error('Manca SUPABASE_KEY in Impostazioni progetto → Proprietà script.');
+  const oggi = new Date();
+  const mese = Utilities.formatDate(oggi, FUSO, 'yyyy-MM');
+  let allieve = JSON.parse(supabase(chiave, 'post', '/rest/v1/rpc/riepilogo_mandala', { p_mese: mese }).getContentText());
+  if (prova) {
+    if (!allieve.length) allieve = [esempioAllieva(oggi)];
+    allieve = allieve.slice(0, 3);
+  }
+  let inviate = 0;
+  allieve.forEach(a => {
+    if (!a.email) return;
+    if (MailApp.getRemainingDailyQuota() < 1) { console.warn('Quota giornaliera di mail finita.'); return; }
+    const m = componiMail(a, oggi, mese);
+    MailApp.sendEmail({
+      to: prova ? INSEGNANTE : a.email,
+      subject: (prova ? '[Anteprima per ' + (a.nome || a.email) + '] ' : '') + m.oggetto,
+      htmlBody: m.html,
+      body: m.testo,
+      name: 'Tiziana · Bindu',
+      replyTo: INSEGNANTE
+    });
+    inviate++;
+  });
+  console.log((prova ? 'Anteprime' : 'Mail') + ' inviate: ' + inviate + '.');
+}
+
+function componiMail(a, oggi, mese) {
+  const P = (a.pratiche || []).slice().sort((x, y) => String(x.at).localeCompare(String(y.at)));
+  const n = P.length;
+  const settimanaFa = oggi.getTime() - 7 * 864e5;
+  const S = P.filter(p => Date.parse(p.at) >= settimanaFa);
+  const minTot = P.reduce((t, p) => t + (Number(p.minuti) || 0), 0);
+  const minSett = S.reduce((t, p) => t + (Number(p.minuti) || 0), 0);
+  const giorni = new Set(P.map(p => Utilities.formatDate(new Date(p.at), FUSO, 'yyyy-MM-dd'))).size;
+  const [y, m] = mese.split('-').map(Number);
+  const nomeMese = MESI[m - 1];
+  const ultimo = new Date(y, m, 0).getDate(), giornoOggi = Number(Utilities.formatDate(oggi, FUSO, 'd'));
+  const nome = String(a.nome || '').trim().split(/\s+/)[0];
+  const per = {};
+  P.forEach(p => { const k = TINTE[p.sezione] ? p.sezione : 'mindfulness'; per[k] = per[k] || { n: 0, min: 0 }; per[k].n++; per[k].min += Number(p.minuti) || 0; });
+
+  let oggetto, apertura;
+  if (a.sciolto) {
+    oggetto = 'Il tuo mandala è tornato sabbia';
+    apertura = 'Questo mese hai già lasciato andare il tuo mandala, come i monaci con la sabbia. Il 1° del mese ne nascerà uno nuovo, a partire dal bindu.';
+  } else if (!n) {
+    oggetto = 'Il tuo mandala ti aspetta';
+    apertura = 'Il tuo mandala di ' + nomeMese + ' è ancora al bindu, il punto da cui tutto nasce. Basta una pratica per far nascere il primo anello: una camminata di dieci minuti, qualche respiro consapevole, una lezione.';
+  } else if (!S.length) {
+    oggetto = 'Il tuo mandala di ' + nomeMese;
+    apertura = 'Questa settimana il tuo mandala si è riposato. Ha ' + anelli(n) + ', nati da ' + dur(minTot) + ' di pratica. Va bene così: anche la pausa fa parte del cammino. Quando vuoi, una piccola pratica lo farà crescere di nuovo.';
+  } else {
+    oggetto = S.length === 1 ? 'Il tuo mandala ha un anello in più' : 'Il tuo mandala è cresciuto di ' + S.length + ' anelli';
+    apertura = 'Questa settimana il tuo mandala è cresciuto di ' + anelli(S.length) + (minSett ? ', ' + dur(minSett) + ' di pratica' : '') + '. Adesso ne ha ' + n + (minTot ? ', per ' + dur(minTot) : '') + ' in ' + (giorni === 1 ? 'un giorno' : giorni + ' giorni') + ' di ' + nomeMese + '.';
+  }
+
+  const colori = Object.keys(TINTE).filter(k => per[k]).map(k =>
+    '<span style="display:inline-block;margin:3px 6px 3px 0;padding:5px 11px;border-radius:999px;background:' + TINTE[k].chiaro + ';color:#3B2D4D;font-size:13px;font-weight:600">'
+    + TINTE[k].nome + ' · ' + per[k].n + (per[k].min ? ' · ' + dur(per[k].min) : '') + '</span>').join('');
+  const extra = [];
+  if (per.movimento && !a.sciolto) extra.push('Gli anelli color pesca sono le tue camminate e il movimento libero: anche loro fanno parte della pratica.');
+  if (!a.sciolto && n && ultimo - giornoOggi <= 7) extra.push('Il mese sta per finire. Negli ultimi tre giorni potrai dissolvere il tuo mandala e lasciarlo andare, per ricominciare dal bindu.');
+
+  const html = '<div style="margin:0;padding:24px 12px;background:#FBF6FA;font-family:Helvetica,Arial,sans-serif;color:#3B2D4D">'
+    + '<div style="max-width:520px;margin:0 auto;background:#FFFFFF;border-radius:22px;padding:28px 24px;border:1px solid #EEE3F0">'
+    + '<p style="margin:0 0 4px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8248AC;font-weight:700">Il tuo mandala di ' + nomeMese + '</p>'
+    + '<h1 style="margin:0 0 16px;font-family:Georgia,serif;font-weight:400;font-size:26px;color:#3B2D4D">' + (nome ? 'Ciao ' + esc(nome) + ',' : 'Ciao,') + '</h1>'
+    + '<p style="margin:0 0 18px;font-size:16px;line-height:1.55">' + esc(apertura) + '</p>'
+    + (n && !a.sciolto ? disegno(P) : '')
+    + (colori ? '<p style="margin:16px 0 6px;font-size:14px;color:#7A6B8A">I colori del tuo mese</p><div>' + colori + '</div>' : '')
+    + extra.map(t => '<p style="margin:16px 0 0;font-size:15px;line-height:1.55">' + esc(t) + '</p>').join('')
+    + '<p style="margin:24px 0 8px;text-align:center"><a href="' + SITO + '" style="display:inline-block;background:#3B2D4D;color:#FFFFFF;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px">Apri il tuo mandala</a></p>'
+    + '<p style="margin:22px 0 0;font-size:15px;line-height:1.55">Con affetto,<br>Tiziana</p>'
+    + '</div>'
+    + '<p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.5;color:#7A6B8A;text-align:center">Ricevi questa mail ogni domenica perché pratichi con Bindu. Se non vuoi più riceverla, apri Bindu, tocca il tuo profilo in alto a destra e togli la spunta da «La mail della domenica».</p>'
+    + '</div>';
+  const testo = (nome ? 'Ciao ' + nome + ',' : 'Ciao,') + '\n\n' + apertura + '\n\n' + extra.join('\n\n') + (extra.length ? '\n\n' : '')
+    + 'Apri il tuo mandala: ' + SITO + '\n\nCon affetto,\nTiziana';
+  return { oggetto: oggetto, html: html, testo: testo };
+}
+
+/** Il mandala in mail: un cerchio colorato per ogni pratica, più grande se è durata di più. */
+function disegno(P) {
+  const punti = P.slice(-60).map(p => {
+    const t = TINTE[p.sezione] || TINTE.mindfulness;
+    const mm = Number(p.minuti) || 30, d = Math.round(Math.max(12, Math.min(26, 10 + mm / 4)));
+    return '<span style="display:inline-block;width:' + d + 'px;height:' + d + 'px;margin:3px;border-radius:50%;background:' + t.chiaro + ';border:2px solid ' + t.scuro + ';vertical-align:middle"></span>';
+  }).join('');
+  return '<div style="text-align:center;padding:18px 12px;border-radius:18px;background:#F6EEFB">'
+    + '<span style="display:inline-block;width:12px;height:12px;margin:3px 8px;border-radius:50%;background:#8248AC;vertical-align:middle"></span>'
+    + punti + '</div>';
+}
+
+function esempioAllieva(oggi) {
+  const g = n => new Date(oggi.getTime() - n * 864e5).toISOString();
+  return { nome: 'Anna (esempio)', email: INSEGNANTE, sciolto: false, pratiche: [
+    { at: g(12), sezione: 'yoga', minuti: 60, titolo: 'Lezione di yoga', tipo: 'presenza' },
+    { at: g(9), sezione: 'movimento', minuti: 40, titolo: 'Camminata', tipo: 'camminata' },
+    { at: g(5), sezione: 'mindfulness', minuti: 10, titolo: 'Silenzio · 10 min', tipo: null },
+    { at: g(3), sezione: 'posturale', minuti: 56, titolo: "Posturale ottobre '26", tipo: 'video' },
+    { at: g(1), sezione: 'movimento', minuti: 25, titolo: 'Camminata', tipo: 'camminata' }
+  ] };
+}
+
+function anelli(n) { return n === 1 ? 'un anello' : n + ' anelli'; }
+function dur(min) { min = Math.round(min); const h = Math.floor(min / 60), r = min % 60; return h ? (h === 1 ? "un'ora" : h + ' ore') + (r ? ' e ' + r + ' minuti' : '') : min + ' minuti'; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }

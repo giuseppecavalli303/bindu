@@ -378,6 +378,19 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 .invito{padding:22px 24px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--peach) 55%, var(--surface)), var(--surface) 70%)}
 .invito h2{font-size:clamp(1.4rem, 4vw, 1.7rem)}
 .invito p{max-width:60ch}
+/* Presenze */
+.pres-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:14px}
+.pres-list li{border-bottom:1px solid var(--line)}
+.pres-list li:last-child{border-bottom:0}
+.pres-list label{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;font-weight:600}
+.pres-list input{width:20px;height:20px;accent-color:var(--sez, var(--lilac-ink));flex:none}
+.pres-list small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.pres-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pres-tools .btn{padding:5px 11px;font-size:.8rem}
+.done.segnata{cursor:default}
+.diario .da{font-size:.76rem;color:var(--muted);grid-column:2}
+.mail-pref{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.mail-pref input{width:22px;height:22px;accent-color:var(--lilac-ink);flex:none;margin-top:2px}
 /* Video rivisto */
 .ancora{border:0;background:none;color:var(--sez, var(--ink));font-weight:600;font-size:.82rem;cursor:pointer;padding:6px 4px;text-decoration:underline;text-underline-offset:3px}
 .pov .ancora{color:#F6EEFB}
@@ -540,7 +553,7 @@ function sceneSvg(kind){
 const curMonth = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
 const MESE_OGGI = curMonth();
 const LS = 'pdm-pratica-v1';
-const st = {temi:[], contenuti:[], lezioni:[], mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
+const st = {temi:[], contenuti:[], lezioni:[], presenze:[], mailSett:null, mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
   loading:true, offline:false, armed:null, done:{}, uid:null, pRef:null, pLoaded:false, localOnly:false,
   pQueue:Promise.resolve(), dirty:false, tmin:10, scene:'alba',
   sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[],
@@ -787,6 +800,7 @@ function tools(col, x){
 }
 function metaLine(x){ const b=[]; if(x.durata) b.push(esc(x.durata)); if(x.tipo==='video' && x.livello) b.push(esc(x.livello)); return b.join(' · '); }
 function doneBtn(x, off, onL){ off = off || 'Ho praticato'; onL = onL || 'Praticato'; const on = !!st.done[x.id];
+  if(!on && Object.values(st.done).some(v => v && v.ref===x.id)) return `<span class="done on segnata">${ICON.petal}<span>Presente · segnata da Tiziana</span></span>`;
   const ancora = on && x.tipo!=='diretta' && x.tipo!=='articolo' && st.mese===MESE_OGGI ? `<button class="ancora" data-act="ancora" data-id="${esc(x.id)}" aria-label="Ho praticato di nuovo: ${esc(x.titolo)}">+ Di nuovo</button>` : '';
   return `<button class="done ${on?'on':''}" data-act="done" data-id="${esc(x.id)}" data-off="${off}" data-on="${onL}" aria-pressed="${on}">${ICON.petal}<span>${on?onL:off}</span></button>${ancora}`; }
 function videoCard(x){
@@ -878,7 +892,7 @@ function diario(P){
   const rows = P.slice().reverse().map(p => { const armed = st.armed==='pr/'+p.key;
     return `<li class="${COLORE[p.sezione]||'s-mind'}"><span class="dot"></span><div><span class="t">${esc(p.titolo||'Pratica')}</span>
       <small>${esc(dataGiorno(p.at))}${p.minuti ? ' · '+esc(durTxt(p.minuti)) : ''} · ${esc(NOME_SEZ[p.sezione]||'')}</small>${p.nota ? `<p class="nota">${esc(p.nota)}</p>` : ''}</div>
-      <div class="acts"><button class="btn" data-act="pr-edit" data-id="${esc(p.key)}">Modifica</button><button class="btn danger ${armed?'armed':''}" data-act="pr-del" data-id="${esc(p.key)}">${armed?'Conferma':'Togli'}</button></div></li>`; }).join('');
+      ${p.insegnante ? `<span class="da">Presenza segnata da Tiziana</span>` : `<div class="acts"><button class="btn" data-act="pr-edit" data-id="${esc(p.key)}">Modifica</button><button class="btn danger ${armed?'armed':''}" data-act="pr-del" data-id="${esc(p.key)}">${armed?'Conferma':'Togli'}</button></div>`}</li>`; }).join('');
   return `<details class="diario" ${st.diarioOpen?'open':''}><summary>Il diario di ${esc(meseNome(st.mese))} <small>${P.length} ${P.length===1?'pratica':'pratiche'}${tot ? ' · '+esc(durTxt(tot)) : ''}</small></summary><ul>${rows}</ul></details>`;
 }
 document.addEventListener('toggle', e => { if(e.target.classList && e.target.classList.contains('diario')) st.diarioOpen = e.target.open; }, true);
@@ -890,7 +904,7 @@ function liveCard(x){
   return `<article class="card live ${s.cls}"><div class="live-date" aria-hidden="true"><b>${ok ? d.getDate() : '–'}</b><span>${esc(mese)}</span></div>
     <div class="body" style="padding:0"><div class="meta"><span class="chip">${esc(s.nome)}</span>${badge(x)}</div><h3>${esc(x.titolo)}</h3>
     <p class="when">${fmtQuando(x.quando)}${x.durata ? ' · '+esc(x.durata) : ''}</p>${dove ? `<p class="when">${dove}</p>` : ''}
-    ${x.descrizione ? `<p class="desc">${esc(x.descrizione)}</p>` : ''}${Date.parse(x.quando) <= Date.now() ? `<div class="foot">${doneBtn(x, 'Ero presente', 'Presente')}</div>` : ''}${tools('contenuti',x)}</div></article>`;
+    ${x.descrizione ? `<p class="desc">${esc(x.descrizione)}</p>` : ''}${Date.parse(x.quando) <= Date.now() ? `<div class="foot">${st.canEdit ? presBtn(x) : doneBtn(x, 'Ero presente', 'Presente')}</div>` : ''}${tools('contenuti',x)}</div></article>`;
 }
 function percorso(k){
   const items = st.contenuti.filter(c => c.sezione===k && c.mese===st.mese && c.settimana && c.tipo!=='diretta').sort((a,b)=>String(a.creato||'').localeCompare(String(b.creato||'')));
@@ -1105,6 +1119,61 @@ window.addEventListener('message', e => {
   povItem._fine = true;
   if(st.done[povItem.id]) ripeti(povItem.id); else setDone(povItem.id, true, povItem);
 });
+
+/* ---------- presenze segnate dall'insegnante ---------- */
+function presBtn(x){
+  const n = st.presenze.filter(r => r.chiave===x.id).length;
+  return `<button class="btn" data-act="presenze" data-id="${esc(x.id)}">Segna le presenze${n ? ' · '+n : ''}</button>`;
+}
+function openPresenze(base){
+  // base: {chiave, titolo, sezione, minuti, at, fisso}
+  const presenti = new Set(st.presenze.filter(r => r.chiave===base.chiave).map(r => r.allieva_id));
+  const oggi = new Date(), at = base.at ? new Date(base.at) : oggi;
+  const campi = base.fisso
+    ? `<p class="reg-cosa">${esc(base.titolo)} <span class="muted">· ${esc(NOME_SEZ[base.sezione]||'')} · ${esc(dataGiorno(at))}</span></p>`
+    : `<div class="row2"><div class="field"><label for="ps-sez">Sezione</label><select id="ps-sez">${Object.entries(SEZ).map(([k,s]) => `<option value="${k}" ${k===base.sezione?'selected':''}>${s.nome}</option>`).join('')}</select></div>
+        <div class="field"><label for="ps-data">Giorno</label><input type="date" id="ps-data" value="${isoDay(at)}" max="${isoDay(oggi)}"></div></div>
+       <div class="row2"><div class="field"><label for="ps-tit">Titolo</label><input id="ps-tit" maxlength="80" value="${esc(base.titolo||'')}" placeholder="Lezione di yoga in sala"></div>
+        <div class="field"><label for="ps-min">Durata (minuti)</label><input type="number" id="ps-min" min="1" max="600" inputmode="numeric" value="${esc(base.minuti||60)}"></div></div>`;
+  const lista = st.allieve.length ? `<div class="pres-tools"><span class="lbl" id="ps-al">Chi era presente?</span><button type="button" class="btn" data-ps="tutte">Tutte</button><button type="button" class="btn" data-ps="nessuna">Nessuna</button></div>
+      <ul class="pres-list" role="group" aria-labelledby="ps-al">${st.allieve.map(a => `<li><label><input type="checkbox" value="${esc(a.id)}" ${presenti.has(a.id)?'checked':''}>
+        <span>${esc(a.nome || a.email || ('+'+a.telefono))}${a.nome && a.email ? `<small>${esc(a.email)}</small>` : ''}</span></label></li>`).join('')}</ul>`
+    : `<div class="empty">Non ci sono ancora allieve. Aggiungile in <a href="#account">Gestisci Bindu</a>.</div>`;
+  $('#sheet-host').innerHTML = `<div class="sheet-bg" id="ps-bg"><form class="sheet ${COLORE[base.sezione]||''}" id="ps-f" role="dialog" aria-modal="true" aria-labelledby="ps-t" novalidate>
+    <div class="sheet-head"><h2 id="ps-t">Segna le presenze</h2><button type="button" class="btn" id="ps-x">Chiudi</button></div>
+    ${campi}
+    <p class="muted">Ogni allieva spuntata riceve un anello nel suo mandala.</p>
+    ${lista}
+    <p class="form-err" id="ps-err" hidden></p>
+    <div class="sheet-actions"><button class="btn primary" type="submit" ${st.allieve.length?'':'disabled'}>Salva le presenze</button></div></form></div>`;
+  const f = $('#ps-f');
+  f.addEventListener('click', e => { const b = e.target.closest('[data-ps]'); if(!b) return; f.querySelectorAll('.pres-list input').forEach(i => i.checked = b.dataset.ps==='tutte'); });
+  $('#ps-x').addEventListener('click', closeRegistra);
+  $('#ps-bg').addEventListener('click', e => { if(e.target.id==='ps-bg') closeRegistra(); });
+  f.addEventListener('submit', e => { e.preventDefault(); salvaPresenze(base, presenti); });
+  document.addEventListener('keydown', regKey);
+}
+async function salvaPresenze(base, prima){
+  const err = $('#ps-err'), btn = $('#ps-f [type=submit]'); err.hidden = true;
+  let {chiave, titolo, sezione, minuti:mn, at} = base;
+  if(!base.fisso){
+    sezione = $('#ps-sez').value; titolo = $('#ps-tit').value.trim() || ('Lezione di ' + NOME_SEZ[sezione].toLowerCase());
+    mn = Math.round(Number($('#ps-min').value)); const q = $('#ps-data').value;
+    if(!q){ err.textContent = 'Scegli il giorno.'; err.hidden = false; return; }
+    if(!(mn >= 1 && mn <= 600)){ err.textContent = 'Scrivi la durata in minuti.'; err.hidden = false; return; }
+    const [y,m,d] = q.split('-').map(Number); at = new Date(y, m-1, d, 18).toISOString();
+    chiave = chiave || ('sala-' + q + '-' + sezione + '-' + Date.now().toString(36));
+  }
+  const ora = new Set([...document.querySelectorAll('#ps-f .pres-list input:checked')].map(i => i.value));
+  const nuove = [...ora].filter(id => !prima.has(id)), tolte = [...prima].filter(id => !ora.has(id));
+  const dt = new Date(at || Date.now());
+  btn.disabled = true; btn.textContent = 'Salvo…';
+  try{
+    if(nuove.length){ const r = await st.sb.from('presenze').insert(nuove.map(id => ({allieva_id:id, chiave, titolo:String(titolo).slice(0,120), sezione, minuti:mn||null, at:dt.toISOString(), mese:meseDi(dt)}))); if(r.error) throw r.error; }
+    if(tolte.length){ const r = await st.sb.from('presenze').delete().eq('chiave', chiave).in('allieva_id', tolte); if(r.error) throw r.error; }
+    closeRegistra(); toast(ora.size ? `${ora.size} ${ora.size===1?'presenza segnata':'presenze segnate'}` : 'Presenze aggiornate'); await loadData();
+  }catch(e){ btn.disabled = false; btn.textContent = 'Salva le presenze'; err.textContent = 'Salvataggio non riuscito: ' + (e.message || 'riprova'); err.hidden = false; }
+}
 
 /* ---------- registra una pratica ---------- */
 const CRONO = 'bindu-crono-v1';
@@ -1334,6 +1403,11 @@ document.addEventListener('click', async e => {
   else if(act==='done') setDone(id, !st.done[id]);
   else if(act==='timer') openTimer();
   else if(act==='registra') openRegistra();
+  else if(act==='presenze'){ const x = st.contenuti.find(c => c.id===id); if(x) openPresenze({chiave:x.id, titolo:x.titolo, sezione:x.sezione, minuti:minuti(x.durata) ? Math.round(minuti(x.durata)) : 60, at:x.quando, fisso:true}); }
+  else if(act==='presenze-sala'){ const g = id ? st.presenze.find(r => r.chiave===id) : null;
+    openPresenze(g ? {chiave:g.chiave, titolo:g.titolo, sezione:g.sezione, minuti:g.minuti, at:g.at} : {sezione:'yoga', minuti:60}); }
+  else if(act==='mail-sett'){ const on = b.checked; const r = await st.sb.rpc('imposta_mail_settimanale', {attiva:on});
+    if(r.error){ b.checked = !on; toast('La scelta non è stata salvata. Riprova.'); } else { st.mailSett = on; toast(on ? 'Riceverai la mail della domenica' : 'Non riceverai più la mail della domenica'); } }
   else if(act==='ancora') ripeti(id);
   else if(act==='pr-edit') openRegistra(id);
   else if(act==='pr-del'){
@@ -1593,7 +1667,7 @@ function viewAccount(){
   const admin = st.canEdit;
   const righe = st.allieve.map(a => {
     const armed = st.armed === 'al/'+a.id, contatti = [a.email, a.telefono ? '+'+a.telefono : ''].filter(Boolean).join(' · ');
-    return `<li><span><b>${esc(a.nome || contatti)}</b>${a.nome ? `<small>${esc(contatti)}</small>` : ''}</span>
+    return `<li><span><b>${esc(a.nome || contatti)}</b>${a.nome ? `<small>${esc(contatti)}</small>` : ''}${a.email && a.mail_settimanale===false ? `<small>Ha disattivato la mail della domenica</small>` : ''}</span>
       <button class="btn danger ${armed?'armed':''}" data-act="al-del" data-id="${esc(a.id)}">${armed?'Conferma':'Togli'}</button></li>`;
   }).join('');
   const lista = admin ? `<section class="card al-card"><div class="group-head"><h2>Allieve</h2><span class="muted">${st.allieve.length} nell'elenco</span></div>
@@ -1604,9 +1678,18 @@ function viewAccount(){
       ${TEL ? `<input class="inp" id="al-tel" type="tel" inputmode="tel" placeholder="Telefono" aria-label="Telefono dell'allieva">` : ''}
       <button class="btn primary" type="submit">Aggiungi</button></form><p class="form-err" id="al-err" hidden></p>
     <ul class="al-list">${righe || '<li class="muted">Nessuna allieva ancora.</li>'}</ul></section>` : '';
+  const gruppi = {}; st.presenze.forEach(r => { (gruppi[r.chiave] = gruppi[r.chiave] || Object.assign({n:0}, r)).n++; });
+  const sale = Object.values(gruppi).filter(g => !st.contenuti.some(c => c.id===g.chiave)).sort((a,b) => String(b.at).localeCompare(String(a.at))).slice(0,8);
+  const presenze = admin ? `<section class="card al-card"><div class="group-head"><h2>Presenze</h2></div>
+    <p class="muted">Per le lezioni dal vivo in calendario usa «Segna le presenze» sulla lezione. Qui puoi segnare quelle in sala o fuori calendario: ogni allieva presente riceve un anello nel suo mandala.</p>
+    <div class="m-btns"><button class="btn primary" data-act="presenze-sala">Segna le presenze di una lezione</button></div>
+    ${sale.length ? `<ul class="al-list">${sale.map(g => `<li><span><b>${esc(g.titolo)}</b><small>${esc(dataGiorno(g.at))} · ${esc(NOME_SEZ[g.sezione]||'')} · ${g.n} ${g.n===1?'presente':'presenti'}</small></span>
+      <button class="btn" data-act="presenze-sala" data-id="${esc(g.chiave)}">Modifica</button></li>`).join('')}</ul>` : ''}</section>` : '';
+  const mailPref = !admin && st.mailSett !== null ? `<section class="card al-card"><h2>La mail della domenica</h2>
+    <label class="mail-pref"><input type="checkbox" data-act="mail-sett" ${st.mailSett?'checked':''}><span>Ogni domenica ricevo una mail da Tiziana su come sta crescendo il mio mandala.<br><small class="muted">Puoi cambiare idea quando vuoi.</small></span></label></section>` : '';
   return hero('tramonto', `<span class="eyebrow">${admin ? 'Insegnante' : 'Il tuo profilo'}</span><h1>${admin ? 'Gestisci Bindu' : 'Il tuo spazio'}</h1>
       <p class="sub">Hai fatto l'accesso come ${esc(st.chi)}.</p><div class="m-btns"><button class="btn" data-act="logout">Esci</button></div>`, 'short')
-    + `<div class="wrap stack lift">${lista}${admin ? '' : mandalaCard()}</div>`;
+    + `<div class="wrap stack lift">${lista}${presenze}${admin ? '' : mandalaCard() + mailPref}</div>`;
 }
 
 async function inviaCodice(canale, dest, ancora){
@@ -1630,24 +1713,30 @@ async function inviaCodice(canale, dest, ancora){
 async function loadData(){
   if(!st.sb || !st.session || !st.member) return;
   st.lastLoad = Date.now();
-  const [t, c, p, lz] = await Promise.all([
+  const [t, c, p, lz, pr] = await Promise.all([
     st.sb.from('temi').select('*'),
     st.sb.from('contenuti').select('*'),
     st.sb.from('pratiche').select('*'),
-    st.sb.from('lezioni').select('drive_id,sezione,titolo,link,durata,mese,anno,caricata')
+    st.sb.from('lezioni').select('drive_id,sezione,titolo,link,durata,mese,anno,caricata'),
+    st.sb.from('presenze').select('id,allieva_id,chiave,titolo,sezione,minuti,at,mese')
   ]);
   if(t.error || c.error){ st.offline = true; st.loading = false; render(); return; }
   st.offline = false;
   st.temi = (t.data||[]).map(x => Object.assign({}, x, {approfondimenti: Array.isArray(x.approfondimenti) ? x.approfondimenti : []}));
   st.contenuti = c.data || [];
   if(!lz.error) st.lezioni = (lz.data||[]).map(LZ);
-  if(!p.error){ const d = {}; (p.data||[]).forEach(r => d[r.chiave] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:r.tipo??null, nota:r.nota??null}); st.done = d; saveLocal(); }
+  if(!p.error){ const d = {}; (p.data||[]).forEach(r => d[r.chiave] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:r.tipo??null, nota:r.nota??null});
+    // le presenze segnate da Tiziana entrano nel mandala dell'allieva (senza doppioni con "Ero presente")
+    if(!st.canEdit && !pr.error) (pr.data||[]).forEach(r => { if(!d[r.chiave]) d['pres-'+r.id] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:'presenza', insegnante:true, ref:r.chiave}; });
+    st.done = d; saveLocal(); }
+  st.presenze = st.canEdit && !pr.error ? (pr.data||[]) : [];
   const paths = [...new Set(st.contenuti.map(x => x.file).filter(Boolean))];
   if(paths.length){
     const sg = await st.sb.storage.from('media').createSignedUrls(paths, 6*3600);
     if(!sg.error) (sg.data||[]).forEach(r => { const u = r.signedUrl || r.signedURL; if(u && r.path) st.urls[r.path] = u; });
   }
-  if(st.canEdit){ const a = await st.sb.from('allieve').select('id,email,telefono,nome').order('nome', {nullsFirst:false}); if(!a.error) st.allieve = a.data || []; }
+  if(st.canEdit){ const a = await st.sb.from('allieve').select('id,email,telefono,nome,mail_settimanale').order('nome', {nullsFirst:false}); if(!a.error) st.allieve = a.data || []; }
+  else { const m = await st.sb.rpc('mia_mail_settimanale'); st.mailSett = m.error ? null : m.data !== false; }
   st.loading = false; render(); renderCrono();
 }
 let ultimoToken = null;
