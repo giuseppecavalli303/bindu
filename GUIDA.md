@@ -2,6 +2,8 @@
 
 Tempo: circa 30–40 minuti la prima volta. Costo: zero (piani gratuiti di GitHub e Supabase).
 
+> **Stato a novembre 2026: tutti i passi da 1 a 7 sono già fatti.** Il sito è online su <https://giuseppecavalli303.github.io/bindu/>. Questa guida serve per rifare tutto da capo, oppure per capire com'è stato configurato. I dettagli sono nella sezione "Stato attuale" di [AGENTS.md](AGENTS.md).
+
 Ti servono due account gratuiti:
 
 - **GitHub**, che ospita il sito: <https://github.com>

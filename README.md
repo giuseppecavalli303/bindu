@@ -6,7 +6,9 @@ Yoga, posturale e mindfulness: tema del mese, lezioni registrate, blog, meditazi
 - Database, accesso con codice monouso e file su Supabase (`supabase/*.sql`)
 - Solo le allieve invitate dall'insegnante possono entrare
 
-Per metterlo online segui [GUIDA.md](GUIDA.md).
+**Sito:** <https://giuseppecavalli303.github.io/bindu/>
+
+Come è stato messo online: [GUIDA.md](GUIDA.md). Per chi lavora sul codice, persone o assistenti AI come Claude o ChatGPT: leggete prima [AGENTS.md](AGENTS.md).
 
 | File | A cosa serve |
 |---|---|

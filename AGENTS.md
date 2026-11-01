@@ -6,8 +6,31 @@ Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la u
 
 - **Un solo file**: `index.html` contiene HTML, CSS e JavaScript. Non ci sono build, framework o npm. Il sito è statico, pubblicato con GitHub Pages dal branch `main`.
 - **Database**: Supabase. Il client `supabase-js@2.45.4` arriva da jsDelivr, la configurazione da `config.js` (`window.BINDU_CONFIG`: URL, chiave anon/publishable, `telefono: '' | 'sms' | 'whatsapp'`).
-- **Accesso**: codice monouso a 6 cifre via email (`signInWithOtp` + `verifyOtp` con `type:'email'`), oppure via SMS/WhatsApp se attivato. Niente password, niente link magici.
+- **Accesso**: codice monouso a 6 cifre via email (`signInWithOtp` + `verifyOtp` con `type:'email'`), oppure via SMS/WhatsApp se attivato. Niente password. Per sicurezza la pagina accetta anche il link dell'email (`emailRedirectTo` = indirizzo del sito, `detectSessionInUrl`), ma le email configurate mandano il codice.
 - **Chi entra**: solo gli indirizzi nella tabella `allieve`, più le insegnanti nella tabella `admins`. Il controllo lo fanno le funzioni SQL `is_member()` e `is_admin()` e le regole RLS in `supabase/01-struttura.sql`.
+
+## Stato attuale (novembre 2026)
+
+| Cosa | Dove / come |
+|---|---|
+| Sito online | <https://giuseppecavalli303.github.io/bindu/> (GitHub Pages, branch `main`, cartella principale) |
+| Codice | <https://github.com/giuseppecavalli303/bindu> |
+| Database | Supabase, progetto `bindu` (ref `muakbnnfscwciogulmqt`, regione Paris), organizzazione **Bindu** sul piano Free. Va tenuto **separato** dal progetto Distanti Book Club |
+| Struttura dati | `supabase/01-struttura.sql`, `02-insegnante.sql` e `03-esempi.sql` sono già stati eseguiti |
+| Insegnante | Tiziana, `yogacontiziana@gmail.com` (tabella `admins`) |
+| Auth → URL Configuration | Site URL = indirizzo del sito qui sopra |
+| Email di accesso | SMTP personalizzato tramite Brevo (`smtp-relay.brevo.com`, porta 465, chiave SMTP dedicata "bindu"). Mittente verificato: Bindu `<yogacontiziana@gmail.com>`. Limite predefinito di 30 email l'ora (Auth → Rate Limits) |
+| Modelli email | "Magic link or OTP" e "Confirm sign up" sono in italiano, oggetto "Il tuo codice per entrare in Bindu", e contengono `{{ .Token }}` (il codice a 6 cifre) |
+| SMS / WhatsApp | Non attivi (`telefono: ''` in `config.js`) |
+
+C'è anche una versione di prova dell'app pubblicata come Artifact su claude.ai, con la stessa grafica, che salva i dati sulla piattaforma di Claude. **Il sito vero è questo repository.**
+
+### Cosa manca o andrebbe migliorato
+
+- Informativa privacy (GDPR) per le allieve: nome ed email vengono conservati.
+- Il mittente usa un indirizzo Gmail, quindi alcune email possono finire nello spam. Con un dominio proprio autenticato su Brevo si risolve.
+- Gli esercizi della pausa posturale (`const PAUSA` in `index.html`) sono esempi scritti da un'AI: vanno sostituiti con quelli dell'insegnante.
+- I contenuti d'esempio di novembre hanno `esempio = true` e si possono eliminare dall'app.
 
 ## Dati (tabelle Supabase)
 
@@ -31,5 +54,7 @@ I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`crea
 
 - Prima di modificare `index.html`, cerca la sezione giusta: i commenti `/* ---------- ... ---------- */` dividono il codice (scene, mandala, viste, timer, pausa posturale, modulo insegnante, accesso Supabase).
 - Le modifiche al database vanno in un nuovo file `supabase/0N-descrizione.sql`, che si possa rieseguire senza danni (`if not exists`, `drop policy if exists`). Aggiorna anche `GUIDA.md`.
-- Non mettere mai nel codice la chiave `service_role` / `secret`, password o dati delle allieve.
+- Non mettere mai nel codice la chiave `service_role` / `secret`, la chiave SMTP di Brevo, password o dati delle allieve. La chiave `sb_publishable_...` in `config.js` invece è pubblica per scelta: la protezione la fanno le regole RLS.
+- Per pubblicare una modifica basta un commit su `main`: GitHub Pages aggiorna il sito in 1–2 minuti.
+- Le modifiche fatte nella dashboard di Supabase o di Brevo vanno annotate nella tabella "Stato attuale" qui sopra.
 - Prova in locale con `python3 -m http.server` nella cartella del progetto, poi apri `http://localhost:8000`.
