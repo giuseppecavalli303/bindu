@@ -1,0 +1,16 @@
+{
+  "name": "Bindu",
+  "short_name": "Bindu",
+  "description": "Yoga, posturale e mindfulness con la tua insegnante",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF6FA",
+  "theme_color": "#FBF6FA",
+  "icons": [
+    { "src": "icona.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icona-180.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
