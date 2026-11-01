@@ -36,7 +36,7 @@ function sincronizza() {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(1000)) return;
   try {
-    const chiave = PropertiesService.getScriptProperties().getProperty('SUPABASE_KEY');
+    const chiave = (PropertiesService.getScriptProperties().getProperty('SUPABASE_KEY') || '').replace(/\s+/g, ''); // toglie spazi finiti nel copia-incolla
     if (!chiave) throw new Error('Manca SUPABASE_KEY in Impostazioni progetto → Proprietà script.');
 
     const oggi = new Date();

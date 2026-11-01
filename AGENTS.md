@@ -23,7 +23,7 @@ Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la u
 | Auth → URL Configuration | Site URL = indirizzo del sito qui sopra |
 | Email di accesso | SMTP personalizzato tramite Brevo (`smtp-relay.brevo.com`, porta 465, chiave SMTP dedicata "bindu2"; se la mail non parte e i log Auth dicono `535 Authentication failed`, la chiave in Supabase è sbagliata: generarne una nuova su Brevo e incollarla in Auth → SMTP Settings). Mittente verificato: Bindu `<yogacontiziana@gmail.com>`. Limite predefinito di 30 email l'ora (Auth → Rate Limits) |
 | Modelli email | "Magic link or OTP" e "Confirm sign up" sono in italiano, oggetto "Il tuo codice per entrare in Bindu", e contengono `{{ .Token }}` (il codice a 6 cifre) |
-| Lezioni da Drive | `supabase/04-lezioni.sql` eseguito. Programma `google/bindu-drive.gs`: vedi GUIDA.md passo 9 per lo stato dell'installazione |
+| Lezioni da Drive | `supabase/04-lezioni.sql` eseguito. Programma installato il 1° novembre 2026 nell'account Google di Tiziana: progetto Apps Script **Bindu Drive**, attivatore `sincronizza` ogni 10 minuti, proprietà `SUPABASE_KEY` = chiave secret "default" di Supabase. Se si cambia `google/bindu-drive.gs` va ricopiato anche nell'editor di Apps Script. Errori: Apps Script → Bindu Drive → Esecuzioni |
 | SMS / WhatsApp | Non attivi (`telefono: ''` in `config.js`) |
 
 C'è anche una versione di prova dell'app pubblicata come Artifact su claude.ai, con la stessa grafica, che salva i dati sulla piattaforma di Claude. **Il sito vero è questo repository.**
