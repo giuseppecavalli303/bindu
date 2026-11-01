@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bindu</title>
-<meta name="description" content="Bindu: yoga, posturale e mindfulness con la tua insegnante. Lezioni, letture e meditazioni del mese.">
+<meta name="description" content="Bindu: yoga, posturale e mindfulness con Tiziana. Lezioni, letture e meditazioni del mese.">
 <meta name="theme-color" content="#FBF6FA">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icona.svg" type="image/svg+xml">
@@ -268,6 +268,42 @@ details .prose{padding:0 16px 16px}
 .login-card h2,.al-card h2{font-size:1.7rem}
 .login-f,.al-f{display:flex;gap:10px;flex-wrap:wrap}
 .login-f .inp,.al-f .inp{flex:1 1 200px;width:auto}
+/* Ingresso: lo spazio di Tiziana. Palette locale, compatibile con tema scuro. */
+.login-page{--bg:#FAF7F0;--surface:#FFFDFA;--ink:#402C42;--muted:#695E67;--line:#D8CDD1;--login-accent:#89566F;--login-button:#53364F;--login-button-text:#FFFAF5;background:var(--bg)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .login-page{--bg:#211B23;--surface:#2C2430;--ink:#F6ECF2;--muted:#CEC0CA;--line:#584958;--login-accent:#E0AEC9;--login-button:#DDB4CE;--login-button-text:#302033}}
+:root[data-theme="dark"] .login-page{--bg:#211B23;--surface:#2C2430;--ink:#F6ECF2;--muted:#CEC0CA;--line:#584958;--login-accent:#E0AEC9;--login-button:#DDB4CE;--login-button-text:#302033}
+.login-page .top{color:var(--ink);background:var(--bg)}
+.login-page .brand svg{width:46px;height:46px}
+.login-page .brand b{font-size:1.8rem}
+.login-page .brand small{display:block;font-size:.63rem;letter-spacing:.1em}
+.login-layout{padding-top:calc(var(--hh, 76px) + 48px);padding-bottom:48px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:56px;align-items:center}
+.login-welcome{min-width:0}
+.login-welcome .eyebrow{color:var(--muted);font-size:.68rem;letter-spacing:.15em}
+.login-welcome h1{font-size:clamp(2.4rem,4.8vw,3.6rem);letter-spacing:-.035em;line-height:1.14;margin:18px 0}
+.login-welcome h1 em{font-style:normal;color:var(--login-accent)}
+.login-welcome .sub{color:var(--muted);font-size:1.05rem;max-width:36ch;line-height:1.65}
+.login-landscape{height:150px;margin-top:26px;position:relative;overflow:hidden;border-radius:12px;isolation:isolate}
+.login-landscape .scene{opacity:.7;filter:var(--scene-filter) saturate(.55)}
+.login-landscape::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--bg),transparent 50%,var(--bg))}
+.login-page .login-card{min-width:0;width:100%;max-width:none;border:1px solid var(--line);padding:32px;border-radius:18px;background:var(--surface);box-shadow:0 16px 40px -28px #402C4240}
+.login-page .login-card h2{font-size:1.65rem}
+.login-page .login-card .muted{font-size:.96rem;overflow-wrap:anywhere}
+.login-page .login-f{flex-direction:column;gap:10px}
+.login-page .login-f label{font-size:.85rem;font-weight:600}
+.login-page .login-f .inp{flex:none;width:100%;min-width:0;min-height:50px;background:var(--bg);border-color:var(--line);border-radius:9px;font-size:1rem}
+.login-page .login-f .code-inp{font-size:1.5rem}
+.login-page .login-f .primary{min-height:50px;border-radius:9px;background:var(--login-button);color:var(--login-button-text)}
+.login-page .linkish{color:var(--login-accent);min-height:44px}
+.login-note{font-size:.8rem;text-align:center;color:var(--muted)}
+.login-signature{grid-column:1/-1;border-top:1px solid var(--line);padding-top:22px;text-align:center;font-size:.8rem;color:var(--muted)}
+@media(max-width:700px){
+ .login-layout{grid-template-columns:minmax(0,1fr);gap:0;max-width:440px;padding:calc(var(--hh, 76px) + 30px) 25px 28px}
+ .login-welcome h1{font-size:2.55rem}
+ .login-welcome .sub{font-size:.96rem}
+ .login-landscape{height:100px;margin:18px -25px 0;border-radius:0}
+ .login-page .login-card{padding:25px 0 24px;border:0;border-radius:0;box-shadow:none;background:transparent}
+ .login-signature{padding-top:18px}
+}
 .code-inp{font-size:1.5rem;letter-spacing:.4em;text-align:center;font-variant-numeric:tabular-nums}
 .seg{display:inline-flex;padding:4px;border-radius:999px;background:color-mix(in srgb, var(--lilac) 30%, var(--surface));gap:4px;align-self:flex-start}
 .seg button{border:0;background:transparent;border-radius:999px;padding:7px 16px;font-weight:600;cursor:pointer;color:var(--muted)}
@@ -332,7 +368,7 @@ details .prose{padding:0 16px 16px}
         <g class="lm-p"><path d="M20 2.5c3.2 3.2 3.6 7.4 0 12-3.6-4.6-3.2-8.8 0-12Z"/><path d="M18.8 14.6c-3.8-.4-7.4-2.8-9.4-6.8 4.4 0 8 2.5 9.4 6.8Z"/><path d="M21.2 14.6c3.8-.4 7.4-2.8 9.4-6.8-4.4 0-8 2.5-9.4 6.8Z"/></g>
         <g class="lm-v"><rect x="16" y="17.4" width="8" height="3.8" rx="1.9"/><rect x="15.2" y="22.6" width="9.6" height="3.8" rx="1.9"/><rect x="14.8" y="27.8" width="10.4" height="3.8" rx="1.9"/><rect x="15.8" y="33" width="8.4" height="3.6" rx="1.8"/></g>
       </svg>
-      <span class="brand-txt"><b>Bindu</b><small>yoga · posturale · mindfulness</small></span>
+      <span class="brand-txt"><b>Bindu</b><small>Pratica con Tiziana</small></span>
     </a>
     <nav class="navtop" id="navtop" aria-label="Sezioni"></nav>
     <label class="mese-pick" for="mese"><span class="sr">Mese</span><select id="mese"></select></label>
@@ -803,6 +839,7 @@ function render(force){
   renderChrome();
   const r = st.route; let html;
   document.body.classList.toggle('gate', !st.session || !st.member);
+  document.body.classList.toggle('login-page', st.configured && st.authReady && !st.session);
   if(!st.configured) html = viewSetup();
   else if(!st.authReady) html = hero('alba', `<span class="eyebrow">Bindu</span><h1>Un momento…</h1>`);
   else if(!st.session) html = viewLogin();
@@ -1180,22 +1217,28 @@ function viewLogin(){
   const body = L.step==='code'
     ? `<h2>Scrivi il codice</h2>
        <p class="muted">${tel ? `Ti abbiamo mandato un codice di 6 cifre ${dove} a <b>${esc(L.dest)}</b>.` : `Ti abbiamo mandato un'email a <b>${esc(L.dest)}</b>. Se contiene un codice di 6 cifre, scrivilo qui sotto. Se contiene un pulsante o un link per entrare, aprilo da questo telefono o computer.`} Se non la trovi, guarda anche nello spam.</p>
-       <form id="code-f" class="login-f" novalidate><label class="sr" for="code-inp">Codice</label>
+       <form id="code-f" class="login-f" novalidate><label for="code-inp">Codice di accesso</label>
        <input class="inp code-inp" id="code-inp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="······">
        <button class="btn primary" type="submit" id="code-go">Entra</button></form>
        <p class="form-err" id="login-err" hidden></p>
        <p class="hint"><button class="linkish" type="button" data-act="login-again">Mandami un nuovo codice</button> · <button class="linkish" type="button" data-act="login-reset">${tel?'Cambia numero':'Cambia indirizzo'}</button></p>`
-    : `<h2>Entra in Bindu</h2>
-       <p class="muted">${tel ? 'Scrivi il numero di telefono che hai dato alla tua insegnante.' : 'Scrivi l\'email che hai dato alla tua insegnante.'} Ti mandiamo un codice da usare una volta sola: niente password.</p>
+    : `<h2>Entra nel tuo spazio</h2>
+       <p class="muted">${tel ? 'Scrivi il numero di telefono che hai dato a Tiziana.' : 'Scrivi l\'email che hai dato a Tiziana.'} Riceverai un codice per accedere.</p>
        ${seg}
-       <form id="login-f" class="login-f" novalidate><label class="sr" for="login-dest">${tel?'Telefono':'Email'}</label>
+       <form id="login-f" class="login-f" novalidate><label for="login-dest">${tel?'Il tuo numero':'La tua email'}</label>
        ${tel ? `<input class="inp" type="tel" id="login-dest" autocomplete="tel" inputmode="tel" placeholder="333 123 4567">`
              : `<input class="inp" type="email" id="login-dest" autocomplete="email" inputmode="email" placeholder="nome@esempio.it">`}
        <button class="btn primary" type="submit" id="login-go">Ricevi il codice</button></form>
+       <p class="login-note">Nessuna password da ricordare.</p>
        <p class="form-err" id="login-err" hidden></p>`;
-  return hero('alba', `<span class="eyebrow">Yoga · Posturale · Mindfulness</span><h1>Ti diamo il benvenuto</h1>
-      <p class="sub">Lo spazio dove ritrovare le lezioni, le letture e le meditazioni del mese.</p>`)
-    + `<div class="wrap stack lift"><section class="card login-card">${body}</section></div>`;
+  st.scene = 'alba';
+  return `<div class="wrap login-layout"><section class="login-welcome" aria-labelledby="welcome-title">
+      <span class="eyebrow">Yoga · Posturale · Mindfulness</span>
+      <h1 id="welcome-title">Lo spazio di pratica<br>con <em>Tiziana.</em></h1>
+      <p class="sub">Le tue lezioni, le letture e le meditazioni.<br>Un posto dove ritrovarci, anche da casa.</p>
+      <div class="login-landscape" aria-hidden="true">${sceneSvg('alba')}</div></section>
+      <section class="card login-card">${body}</section>
+      <p class="login-signature">Yoga, posturale e mindfulness con Tiziana</p></div>`;
 }
 function viewNonInvitata(){
   return hero('tramonto', `<span class="eyebrow">Bindu</span><h1>Non sei ancora nell'elenco</h1>
@@ -1330,3 +1373,4 @@ if(st.configured){
 </script>
 </body>
 </html>
+

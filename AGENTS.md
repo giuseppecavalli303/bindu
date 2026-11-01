@@ -58,3 +58,14 @@ I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`crea
 - Per pubblicare una modifica basta un commit su `main`: GitHub Pages aggiorna il sito in 1–2 minuti.
 - Le modifiche fatte nella dashboard di Supabase o di Brevo vanno annotate nella tabella "Stato attuale" qui sopra.
 - Prova in locale con `python3 -m http.server` nella cartella del progetto, poi apri `http://localhost:8000`.
+
+
+## Passaggio di lavoro · 1 novembre 2026 · Codex
+
+- Applicata la proposta grafica dell’ingresso approvata da Giuseppe: «Lo spazio di pratica con Tiziana», fondo avorio, prugna, paesaggio alba più discreto e modulo con etichette visibili. Su desktop presentazione e accesso sono affiancati; su mobile sono impilati.
+- Conservato il logo SVG loto-colonna originale. Il sottotitolo del marchio ora è «Pratica con Tiziana» anche dentro l’app.
+- Gli stili nuovi sono circoscritti a `body.login-page` e ai componenti `login-*`; supportano tema chiaro e scuro. Non estendere la palette alle schermate interne senza verificarle.
+- Logica OTP, link di accesso, canali SMS/WhatsApp, database, contenuti e mandala non modificati. Nessuna modifica alle dashboard Supabase/Brevo.
+- Prima di riprendere, leggere il branch aggiornato. Al termine di ogni intervento annotare qui modifiche, verifiche e attività residue per il passaggio Claude/Codex.
+
+- Verifiche: sintassi JavaScript valida; struttura dei moduli ingresso/codice verificata per email, SMS e WhatsApp; anteprima browser desktop e mobile 375 px controllata. Nessun accesso reale con OTP eseguito.
