@@ -241,7 +241,8 @@ function inviaRiepiloghi(prova) {
       htmlBody: m.html,
       body: m.testo,
       name: 'Tiziana · Bindu',
-      replyTo: INSEGNANTE
+      replyTo: INSEGNANTE,
+      inlineImages: m.immagine ? { mandala: m.immagine } : undefined
     });
     inviate++;
   });
@@ -285,12 +286,14 @@ function componiMail(a, oggi, mese) {
   if (per.movimento && !a.sciolto) extra.push('Gli anelli color pesca sono le tue camminate e il movimento libero: anche loro fanno parte della pratica.');
   if (!a.sciolto && n && ultimo - giornoOggi <= 7) extra.push('Il mese sta per finire. Negli ultimi tre giorni potrai dissolvere il tuo mandala e lasciarlo andare, per ricominciare dal bindu.');
 
+  let immagine = null;
+  if (n && !a.sciolto) { try { immagine = mandalaPng(P.slice(-80)); } catch (e) { console.warn('Immagine del mandala non riuscita: ' + e); } }
   const html = '<div style="margin:0;padding:24px 12px;background:#FBF6FA;font-family:Helvetica,Arial,sans-serif;color:#3B2D4D">'
     + '<div style="max-width:520px;margin:0 auto;background:#FFFFFF;border-radius:22px;padding:28px 24px;border:1px solid #EEE3F0">'
     + '<p style="margin:0 0 4px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8248AC;font-weight:700">Il tuo mandala di ' + nomeMese + '</p>'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,serif;font-weight:400;font-size:26px;color:#3B2D4D">' + (nome ? 'Ciao ' + esc(nome) + ',' : 'Ciao,') + '</h1>'
     + '<p style="margin:0 0 18px;font-size:16px;line-height:1.55">' + esc(apertura) + '</p>'
-    + (n && !a.sciolto ? disegno(P) : '')
+    + (immagine ? '<div style="text-align:center;padding:14px;border-radius:22px;background:#F6EEFB"><img src="cid:mandala" width="260" height="260" alt="Il tuo mandala: ' + anelli(n) + '" style="display:block;margin:0 auto;width:260px;max-width:100%;height:auto;border:0"></div>' : '')
     + (colori ? '<p style="margin:16px 0 6px;font-size:14px;color:#7A6B8A">I colori del tuo mese</p><div>' + colori + '</div>' : '')
     + extra.map(t => '<p style="margin:16px 0 0;font-size:15px;line-height:1.55">' + esc(t) + '</p>').join('')
     + '<p style="margin:24px 0 8px;text-align:center"><a href="' + SITO + '" style="display:inline-block;background:#3B2D4D;color:#FFFFFF;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px">Apri il tuo mandala</a></p>'
@@ -300,7 +303,7 @@ function componiMail(a, oggi, mese) {
     + '</div>';
   const testo = (nome ? 'Ciao ' + nome + ',' : 'Ciao,') + '\n\n' + apertura + '\n\n' + extra.join('\n\n') + (extra.length ? '\n\n' : '')
     + 'Apri il tuo mandala: ' + SITO + '\n\nCon affetto,\nTiziana';
-  return { oggetto: oggetto, html: html, testo: testo };
+  return { oggetto: oggetto, html: html, testo: testo, immagine: immagine };
 }
 
 /** Il mandala in mail: un cerchio colorato per ogni pratica, più grande se è durata di più. */
@@ -329,3 +332,119 @@ function esempioAllieva(oggi) {
 function anelli(n) { return n === 1 ? 'un anello' : n + ' anelli'; }
 function dur(min) { min = Math.round(min); const h = Math.floor(min / 60), r = min % 60; return h ? (h === 1 ? "un'ora" : h + ' ore') + (r ? ' e ' + r + ' minuti' : '') : min + ' minuti'; }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+
+/* ---------- il mandala come immagine PNG (per la mail) ----------
+ * Stesso disegno dell'app: un anello per pratica, colore secondo la sezione,
+ * spessore secondo la durata. Disegnato pixel per pixel (le mail non leggono
+ * SVG né canvas), con antialiasing 2x e compressione PNG tramite Utilities.zip.
+ */
+function mandalaPng(P, lato) {
+  lato = lato || 440;
+  const SS = 2, W = lato * SS;
+  const buf = new Uint8ClampedArray(W * W * 3);
+  const sfondo = rgb('#F6EEFB');
+  for (let i = 0; i < W * W; i++) { buf[i * 3] = sfondo[0]; buf[i * 3 + 1] = sfondo[1]; buf[i * 3 + 2] = sfondo[2]; }
+  const c = W / 2, R = W / 2 * .96, r0 = R * .15;
+  const peso = p => { const m = Number(p.minuti); return m > 0 ? Math.min(1.8, Math.max(.45, m / 30)) : 1; };
+  const pesi = P.map(peso), tot = Math.max(pesi.reduce((a, b) => a + b, 0), 6), unit = (R - r0) / tot;
+  // anello guida tratteggiato
+  const guida = rgb('#E4D6EC');
+  for (let k = 0; k < 360; k += 2.2) { const a = k * Math.PI / 180; disco(buf, W, c + Math.cos(a) * R, c + Math.sin(a) * R, SS * .9, guida); }
+  let acc = 0;
+  P.forEach((p, i) => {
+    const t = TINTE[p.sezione] || TINTE.mindfulness, soft = rgb(t.chiaro), deep = rgb(t.scuro);
+    const band = pesi[i] * unit, r = r0 + acc + band / 2; acc += band;
+    const count = Math.min(120, Math.max(6, Math.round(2 * Math.PI * r / (band * 1.15) / 6) * 6));
+    const s = band * .5, w = Math.PI * r / count, tipo = i % 5, off = i % 2 ? Math.PI / count : 0;
+    if (tipo === 4) anello(buf, W, c, c, r, SS * .8, mescola(deep, sfondo, .55));
+    for (let j = 0; j < count; j++) {
+      const a = j / count * Math.PI * 2 + off, x = c + Math.cos(a) * r, y = c + Math.sin(a) * r;
+      if (tipo === 0) ellisse(buf, W, x, y, s * .95, Math.min(s * .42, w * .8), a, soft, deep, SS);
+      else if (tipo === 1) disco(buf, W, x, y, Math.min(s * .3, w * .6), deep);
+      else if (tipo === 2) ellisse(buf, W, x, y, Math.min(w * .98, s * .9) * .62, Math.min(w * .98, s * .9) * .9, a, soft, deep, SS);
+      else if (tipo === 3) ellisse(buf, W, x, y, s, Math.min(s * .5, w * .9) * .55, a, soft, deep, SS);
+      else rombo(buf, W, x, y, s * .5, Math.min(s * .26, w * .6), a, deep);
+    }
+  });
+  // il bindu: sei petali pesca e il punto al centro
+  for (let j = 0; j < 6; j++) { const a = j * Math.PI / 3; ellisse(buf, W, c + Math.cos(a) * r0 * .5, c + Math.sin(a) * r0 * .5, r0 * .48, r0 * .22, a, rgb('#FCD9C7'), rgb('#A8457A'), SS); }
+  disco(buf, W, c, c, r0 * .2, rgb('#8248AC'));
+  // riduzione 2x → antialiasing
+  const out = new Uint8Array(lato * lato * 3);
+  for (let y = 0; y < lato; y++) for (let x = 0; x < lato; x++) for (let k = 0; k < 3; k++) {
+    let v = 0; for (let dy = 0; dy < SS; dy++) for (let dx = 0; dx < SS; dx++) v += buf[((y * SS + dy) * W + x * SS + dx) * 3 + k];
+    out[(y * lato + x) * 3 + k] = Math.round(v / (SS * SS));
+  }
+  return pngDa(out, lato, lato);
+}
+function rgb(h) { return [parseInt(h.substr(1, 2), 16), parseInt(h.substr(3, 2), 16), parseInt(h.substr(5, 2), 16)]; }
+function mescola(a, b, k) { return [0, 1, 2].map(i => Math.round(a[i] * k + b[i] * (1 - k))); }
+function punto(buf, W, x, y, col) { if (x < 0 || y < 0 || x >= W || y >= W) return; const o = (y * W + x) * 3; buf[o] = col[0]; buf[o + 1] = col[1]; buf[o + 2] = col[2]; }
+function disco(buf, W, cx, cy, r, col) {
+  for (let y = Math.floor(cy - r); y <= Math.ceil(cy + r); y++) for (let x = Math.floor(cx - r); x <= Math.ceil(cx + r); x++)
+    if ((x + .5 - cx) ** 2 + (y + .5 - cy) ** 2 <= r * r) punto(buf, W, x, y, col);
+}
+function anello(buf, W, cx, cy, r, sp, col) {
+  for (let y = Math.floor(cy - r - sp); y <= Math.ceil(cy + r + sp); y++) for (let x = Math.floor(cx - r - sp); x <= Math.ceil(cx + r + sp); x++) {
+    const d = Math.sqrt((x + .5 - cx) ** 2 + (y + .5 - cy) ** 2); if (Math.abs(d - r) <= sp / 2) punto(buf, W, x, y, col);
+  }
+}
+/** Ellisse ruotata: interno chiaro, bordo scuro. */
+function ellisse(buf, W, cx, cy, ax, by, ang, soft, deep, SS) {
+  if (ax <= 0 || by <= 0) return;
+  const co = Math.cos(ang), si = Math.sin(ang), m = Math.max(ax, by), bordo = SS * 1.1;
+  const ai = Math.max(ax - bordo, .1), bi = Math.max(by - bordo, .1);
+  for (let y = Math.floor(cy - m); y <= Math.ceil(cy + m); y++) for (let x = Math.floor(cx - m); x <= Math.ceil(cx + m); x++) {
+    const dx = x + .5 - cx, dy = y + .5 - cy, u = dx * co + dy * si, v = -dx * si + dy * co;
+    if ((u * u) / (ax * ax) + (v * v) / (by * by) > 1) continue;
+    punto(buf, W, x, y, (u * u) / (ai * ai) + (v * v) / (bi * bi) <= 1 ? soft : deep);
+  }
+}
+function rombo(buf, W, cx, cy, ax, by, ang, col) {
+  if (ax <= 0 || by <= 0) return;
+  const co = Math.cos(ang), si = Math.sin(ang), m = Math.max(ax, by);
+  for (let y = Math.floor(cy - m); y <= Math.ceil(cy + m); y++) for (let x = Math.floor(cx - m); x <= Math.ceil(cx + m); x++) {
+    const dx = x + .5 - cx, dy = y + .5 - cy, u = dx * co + dy * si, v = -dx * si + dy * co;
+    if (Math.abs(u) / ax + Math.abs(v) / by <= 1) punto(buf, W, x, y, col);
+  }
+}
+/** PNG RGB a 8 bit. La compressione deflate la fa Utilities.zip: si estrae il flusso dallo zip. */
+function pngDa(pix, w, h) {
+  const raw = new Uint8Array(h * (w * 3 + 1));
+  for (let y = 0; y < h; y++) { raw[y * (w * 3 + 1)] = 0; raw.set(pix.subarray(y * w * 3, (y + 1) * w * 3), y * (w * 3 + 1) + 1); }
+  const z = zlibDa(raw);
+  const parti = [Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])];
+  const ihdr = new Uint8Array(13); scrivi32(ihdr, 0, w); scrivi32(ihdr, 4, h); ihdr[8] = 8; ihdr[9] = 2; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+  parti.push(blocco('IHDR', ihdr), blocco('IDAT', z), blocco('IEND', new Uint8Array(0)));
+  const tot = parti.reduce((t, a) => t + a.length, 0), png = new Uint8Array(tot); let o = 0;
+  parti.forEach(a => { png.set(a, o); o += a.length; });
+  return Utilities.newBlob(Array.from(png, b => b > 127 ? b - 256 : b), 'image/png', 'mandala.png');
+}
+function zlibDa(raw) {
+  const zip = Utilities.zip([Utilities.newBlob(Array.from(raw, b => b > 127 ? b - 256 : b), 'application/octet-stream', 'm')]).getBytes().map(b => b & 255);
+  const metodo = zip[8] | zip[9] << 8, dim = (zip[18] | zip[19] << 8 | zip[20] << 16) + zip[21] * 16777216;
+  const inizio = 30 + (zip[26] | zip[27] << 8) + (zip[28] | zip[29] << 8);
+  let def;
+  if (metodo === 8 && dim > 0) def = Uint8Array.from(zip.slice(inizio, inizio + dim));
+  else { // senza compressione: blocchi "stored"
+    const n = Math.ceil(raw.length / 65535) || 1, d = new Uint8Array(raw.length + n * 5); let o = 0;
+    for (let i = 0; i < n; i++) { const pz = raw.subarray(i * 65535, (i + 1) * 65535), L = pz.length;
+      d[o++] = i === n - 1 ? 1 : 0; d[o++] = L & 255; d[o++] = L >> 8; d[o++] = ~L & 255; d[o++] = (~L >> 8) & 255; d.set(pz, o); o += L; }
+    def = d;
+  }
+  let a = 1, b = 0; for (let i = 0; i < raw.length; i++) { a = (a + raw[i]) % 65521; b = (b + a) % 65521; }
+  const z = new Uint8Array(def.length + 6); z[0] = 0x78; z[1] = 0x9C; z.set(def, 2); scrivi32(z, def.length + 2, (b << 16 | a) >>> 0);
+  return z;
+}
+function blocco(tipo, dati) {
+  const out = new Uint8Array(12 + dati.length); scrivi32(out, 0, dati.length);
+  for (let i = 0; i < 4; i++) out[4 + i] = tipo.charCodeAt(i);
+  out.set(dati, 8); scrivi32(out, 8 + dati.length, crc32(out.subarray(4, 8 + dati.length)));
+  return out;
+}
+let CRC_T = null;
+function crc32(d) {
+  if (!CRC_T) { CRC_T = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
+  let c = 0xFFFFFFFF; for (let i = 0; i < d.length; i++) c = CRC_T[(c ^ d[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function scrivi32(a, o, v) { a[o] = v >>> 24 & 255; a[o + 1] = v >>> 16 & 255; a[o + 2] = v >>> 8 & 255; a[o + 3] = v & 255; }
