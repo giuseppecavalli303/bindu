@@ -347,6 +347,13 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 .pov .done{color:#F6EEFB;border-color:rgb(255 255 255 / .45)}
 .pov .done.on{background:#F6EEFB;color:#2B1F4A}
 .pov-foot a{color:#E6D3F6;font-size:.86rem}
+.pov-ios{position:relative;isolation:isolate;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:18px;text-align:center;color:#F6EEFB}
+.pov-ios .scene{position:absolute;z-index:-2;filter:none}
+.pov-ios::before{content:"";position:absolute;inset:0;z-index:-1;background:rgb(24 14 38 / .35)}
+.pov-ios p{font-size:.92rem;max-width:34ch;line-height:1.45}
+.pov-ios .btn.glow{font-size:1rem;padding:12px 20px}
+.pov-ios .linkish{color:#E6D3F6;font-size:.84rem}
+.pov-stato{min-height:1.3em;font-size:.9rem;color:#F6EEFB;text-align:center;max-width:40ch}
 /* Registra una pratica */
 .lbl{font-size:.82rem;font-weight:700;color:var(--muted)}
 .att{display:grid;grid-template-columns:repeat(auto-fill, minmax(150px,1fr));gap:8px}
@@ -1046,12 +1053,21 @@ function openPlayer(x){
   if(!src){ if(link) window.open(link, '_blank', 'noopener'); return; }
   document.querySelectorAll('audio,video').forEach(m => { if(!m.paused) m.pause(); });
   const s = SEZ[x.sezione] || SEZ.yoga; povItem = Object.assign({}, x);
+  const usaAppDrive = isIOS() && linkHost(link)==='Google Drive';
   $('#timer-host').innerHTML = `<div class="pov ${s.cls}" role="dialog" aria-modal="true" aria-labelledby="pov-t">${sceneSvg(s.scena)}
     <div class="pov-head"><div><span class="eyebrow">${esc(s.nome)}${x.durata?' · '+esc(x.durata):''}</span><h2 id="pov-t">${esc(x.titolo)}</h2></div><button class="btn ghost-l" id="pov-x">Chiudi</button></div>
-    <div class="pov-frame"><iframe id="pov-f" src="${esc(src)}" title="${esc(x.titolo)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <div class="pov-frame" id="pov-frame">${usaAppDrive ? `<div class="pov-ios">${sceneSvg(s.scena)}
+        <a class="btn glow" id="pov-app" href="${esc(link)}" target="_blank" rel="noopener">▶ Guarda nell'app Drive</a>
+        <p>Su iPhone le lezioni di Drive si vedono meglio nell'app Google Drive. Quando hai finito, torna qui e tocca «Ho praticato».</p>
+        <button class="linkish" type="button" id="pov-qui">Prova a guardarla qui</button></div>` : iframeDi(src, x)}</div>
+    <p class="pov-stato" id="pov-stato" aria-live="polite"></p>
     <div class="pov-foot">${doneBtn(x)}<a href="${esc(link)}" target="_blank" rel="noopener">Non parte? Apri ${linkHost(link) ? 'su '+esc(linkHost(link)) : 'in una nuova pagina'} ↗</a></div></div>`;
+  if(usaAppDrive){
+    $('#pov-app').addEventListener('click', () => { povItem._fuori = true; });
+    $('#pov-qui').addEventListener('click', () => { $('#pov-frame').innerHTML = iframeDi(src, x); });
+  }
   const f = $('#pov-f');
-  f.addEventListener('load', () => {
+  if(f) f.addEventListener('load', () => {
     try{
       if(/youtube/.test(src)){ f.contentWindow.postMessage(JSON.stringify({event:'listening', id:1, channel:'widget'}), '*');
         f.contentWindow.postMessage(JSON.stringify({event:'command', func:'addEventListener', args:['onStateChange'], id:1, channel:'widget'}), '*'); }
@@ -1063,6 +1079,16 @@ function openPlayer(x){
   document.documentElement.style.overflow = 'hidden';
   setTimeout(() => { const b = $('#pov-x'); if(b) b.focus(); }, 30);
 }
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints > 1);
+const iframeDi = (src, x) => `<iframe id="pov-f" src="${esc(src)}" title="${esc(x.titolo)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+// al ritorno dall'app Drive, un promemoria per segnare la pratica
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState!=='visible' || !povItem || !povItem._fuori) return;
+  povItem._fuori = false;
+  const el = $('#pov-stato'); if(!el) return;
+  el.textContent = st.done[povItem.id] ? 'Eccoti di nuovo. Se l\'hai rivista, tocca «+ Di nuovo» per un altro anello.' : 'Eccoti di nuovo. Hai finito la lezione? Tocca «Ho praticato» per il tuo anello.';
+  const b = document.querySelector('.pov-foot .done'); if(b){ b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
+});
 function povKey(e){ if(e.key==='Escape') closePlayer(); }
 function closePlayer(){
   povItem = null; $('#timer-host').innerHTML = ''; document.removeEventListener('keydown', povKey);

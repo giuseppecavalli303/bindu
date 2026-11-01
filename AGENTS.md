@@ -31,7 +31,7 @@ C'è anche una versione di prova dell'app pubblicata come Artifact su claude.ai,
 
 ### Cosa manca o andrebbe migliorato
 
-- **Video di Drive su iPhone** (novembre 2026): il riquadro di Drive (`/preview`) su iPhone a volte non parte o si blocca. Provato e scartato: riprodurre il file direttamente con `<video>` da `drive.usercontent.google.com` (Drive risponde 403 alle richieste da altri siti) e caricare in automatico su YouTube (i video caricati via API da progetti non verificati restano privati; Zapier va in timeout con file grandi). Decisione: **per ora si resta su Drive**; c'è il link "Apri su Google Drive". L'alternativa valutata è YouTube "non in elenco" caricato a mano da Tiziana in playlist, letto dal programma Google.
+- **Video di Drive su iPhone** (novembre 2026): il riquadro di Drive (`/preview`) su iPhone a volte non parte o si blocca. Provato e scartato: riprodurre il file direttamente con `<video>` da `drive.usercontent.google.com` (Drive risponde 403 alle richieste da altri siti) e caricare in automatico su YouTube (i video caricati via API da progetti non verificati restano privati; Zapier va in timeout con file grandi). Decisione: **per ora si resta su Drive**. Su iPhone il lettore mostra al posto del riquadro un pulsante "Guarda nell'app Drive" (`isIOS()` in `openPlayer`), con "Prova a guardarla qui" e un promemoria per "Ho praticato" quando si torna in Bindu. L'alternativa valutata è YouTube "non in elenco" caricato a mano da Tiziana in playlist, letto dal programma Google.
 
 - Informativa privacy (GDPR) per le allieve: nome ed email vengono conservati.
 - Il mittente usa un indirizzo Gmail, quindi alcune email possono finire nello spam. Con un dominio proprio autenticato su Brevo si risolve.
