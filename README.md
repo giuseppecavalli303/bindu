@@ -1,4 +1,4 @@
-# Bindu
+# Mandala (già Bindu)
 
 Yoga, posturale e mindfulness: tema del mese, lezioni registrate, blog, meditazioni guidate, lezioni dal vivo e un mandala personale che cresce a ogni pratica.
 
@@ -20,5 +20,6 @@ Come è stato messo online: [GUIDA.md](GUIDA.md). Per chi lavora sul codice, per
 | `supabase/03-esempi.sql` | Contenuti d'esempio (facoltativo) |
 | `supabase/05-pratiche-libere.sql` | Durata, tipo e nota delle pratiche (camminate, sport…) |
 | `supabase/06-presenze-e-mail.sql` | Presenze segnate dall'insegnante e mail della domenica |
+| `supabase/07-orario.sql` | Orario settimanale delle lezioni dal vivo |
 | `supabase/04-lezioni.sql` | Tabella delle lezioni dell'anno da Drive |
 | `google/bindu-drive.gs` | Programma Google che porta in Bindu i video delle cartelle Drive |

@@ -1,6 +1,6 @@
-# Istruzioni per chi lavora sul codice di Bindu (persone e assistenti AI)
+# Istruzioni per chi lavora sul codice di Mandala (persone e assistenti AI)
 
-Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la usa non è tecnico: le spiegazioni vanno date in italiano semplice.
+**Mandala** (fino al 1° novembre 2026 si chiamava Bindu: il repository e l'indirizzo del sito contengono ancora `bindu`) è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la usa non è tecnico: le spiegazioni vanno date in italiano semplice.
 
 ## Com'è fatta
 
@@ -19,7 +19,9 @@ Bindu è l'app di un'insegnante di yoga e posturale per le sue allieve. Chi la u
 | Codice | <https://github.com/giuseppecavalli303/bindu> |
 | Database | Supabase, progetto `bindu` (ref `muakbnnfscwciogulmqt`, regione Paris), organizzazione **Bindu** sul piano Free. Va tenuto **separato** dal progetto Distanti Book Club |
 | Struttura dati | `supabase/01-struttura.sql`, `02-insegnante.sql` e `03-esempi.sql` sono già stati eseguiti |
-| Insegnante | Tiziana, `yogacontiziana@gmail.com` (tabella `admins`) |
+| Insegnanti | Tiziana, `yogacontiziana@gmail.com`, e Giuseppe, suo marito, che cura il sito (tabella `admins`) |
+| Orario | `supabase/07-orario.sql` eseguito: lunedì e mercoledì yoga 19–20, martedì e giovedì posturale 19–20. L'app ne ricava le lezioni dal vivo (`lezioniOrario()`, id `or-<id>-<data>`), da ottobre a giugno. Link Zoom da inserire in Gestisci Mandala |
+| Da aggiornare | Oggetto delle mail del codice in Supabase (Auth → Emails → Templates) dice ancora "Bindu". Nel progetto Apps Script va ricopiato `google/bindu-drive.gs` (la mail della domenica firma "Tiziana · Mandala") |
 | Auth → URL Configuration | Site URL = indirizzo del sito qui sopra |
 | Email di accesso | SMTP personalizzato tramite Brevo (`smtp-relay.brevo.com`, porta 465, chiave SMTP dedicata "bindu2"; se la mail non parte e i log Auth dicono `535 Authentication failed`, la chiave in Supabase è sbagliata: generarne una nuova su Brevo e incollarla in Auth → SMTP Settings). Mittente verificato: Bindu `<yogacontiziana@gmail.com>`. Limite predefinito di 30 email l'ora (Auth → Rate Limits) |
 | Modelli email | "Magic link or OTP" e "Confirm sign up" sono in italiano, oggetto "Il tuo codice per entrare in Bindu", e contengono `{{ .Token }}` (il codice a 6 cifre) |
@@ -60,6 +62,7 @@ I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`crea
 - **Presenze**: le lezioni sono su Zoom (link nel campo `dove` della lezione dal vivo). Tiziana spunta le presenti con «Segna le presenze» sulla lezione, o in Gestisci Bindu per le lezioni in sala. L'allieva non può togliere una presenza segnata da Tiziana.
 - **La mail della domenica**: ogni domenica verso le 18 il programma Google manda a ogni allieva (colonna `allieve.mail_settimanale`, che l'allieva cambia dal suo profilo) un riepilogo caldo del mandala del mese, firmato Tiziana: anelli della settimana, colori, minuti, un cerchio colorato per pratica. I dati arrivano dalla funzione SQL `riepilogo_mandala(mese)`, eseguibile solo con la chiave segreta. Il tono incoraggia senza colpevolizzare.
 - **L'anno scolastico**: va da ottobre a giugno. Luglio, agosto e settembre le lezioni registrate sono chiuse. Il 1° luglio inizia il nuovo anno scolastico (le lezioni caricate a settembre compaiono dal 1° ottobre).
+- **Sezioni**: Yoga e Posturale non hanno il percorso del mese (Yoga) né le meditazioni guidate (solo in Mindfulness). Gli approfondimenti del tema possono avere un'immagine (`approfondimenti[].immagine`, file in `media/temi/`, ridotta a 1600 px nel browser).
 - **Grafica**: paesaggi pastello rosa e viola disegnati in SVG (alba = yoga, lago = posturale, notte = mindfulness), font Marcellus + Figtree, tema chiaro e scuro tramite variabili CSS in `:root`. Logo: fiore di loto sopra le vertebre (colonna e loto).
 - **Lingua**: interfaccia in italiano, tono caldo e semplice.
 
