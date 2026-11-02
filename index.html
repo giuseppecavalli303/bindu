@@ -242,6 +242,9 @@ details .prose{padding:0 16px 16px}
 .week .prose{font-size:.92rem;color:var(--muted);line-height:1.55}
 .week .prose p+p{margin-top:.5em}
 .perc-sett{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--line);border-radius:14px}
+.week-img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px}
+.week .btn{align-self:flex-start;margin-top:auto}
+.week .btn svg{width:14px;height:14px}
 .week .none{font-size:.86rem;color:var(--muted)}
 /* Practice calendar */
 .cal{display:grid;grid-template-columns:repeat(7, 28px);gap:4px;font-size:.72rem;font-variant-numeric:tabular-nums}
@@ -876,8 +879,8 @@ function articleCard(x, showSez){
     <h3>${esc(x.titolo)}</h3>${x.descrizione?`<p class="desc">${esc(x.descrizione)}</p>`:''}
     <div class="foot"><a class="read" href="#a-${esc(x.id)}">Leggi l'articolo →</a></div>${tools('contenuti',x)}</div></article>`;
 }
-function lezAnno(k){
-  const items = lezDi(k), cartella = k==='yoga' ? 'Lezioni di Yoga online' : 'Lezioni di Posturale online';
+function lezAnno(k, senzaMese){
+  const items = lezDi(k).filter(l => !senzaMese || l.mese!==senzaMese), cartella = k==='yoga' ? 'Lezioni di Yoga online' : 'Lezioni di Posturale online';
   if(!items.length && !st.canEdit) return '';
   const nota = st.canEdit
     ? `<p class="muted">Arrivano da sole dalla cartella «${cartella}» su Google Drive.${lezioniAperte() ? '' : ' Ora le allieve non le vedono: tornano visibili il 1° ottobre.'}</p>`
@@ -885,7 +888,7 @@ function lezAnno(k){
   const mesi = [...new Set(items.map(l => l.mese))].sort().reverse();
   const body = items.length ? mesi.map((m,i) => { const its = items.filter(l => l.mese===m).sort(byNew);
       return `<details class="mese-lz" ${i===0?'open':''}><summary>${esc(cap(meseLabel(m)))} <small>${its.length} ${its.length===1?'lezione':'lezioni'}</small></summary><div class="list">${its.map(videoCard).join('')}</div></details>`; }).join('')
-    : `<div class="empty">Per ora non ci sono lezioni di quest'anno nella cartella.</div>`;
+    : `<div class="empty">${senzaMese ? 'Le lezioni dei mesi passati appariranno qui.' : 'Per ora non ci sono lezioni di quest\'anno nella cartella.'}</div>`;
   return `<section class="group"><div class="group-head"><h2>Lezioni dell'anno</h2>${nota}</div><div class="anno">${body}</div></section>`;
 }
 const addBtn = (tipo, sez, label) => st.canEdit ? `<button class="btn" data-act="new" data-tipo="${tipo}" data-sez="${sez||''}">${label}</button>` : '';
@@ -954,13 +957,22 @@ function liveCard(x){
     ${x.descrizione ? `<p class="desc">${esc(x.descrizione)}</p>` : ''}${Date.parse(x.quando) <= Date.now() ? `<div class="foot">${st.canEdit ? presBtn(x) : doneBtn(x, 'Ero presente', 'Presente')}</div>` : ''}${tools('contenuti',x)}</div></article>`;
 }
 // Mindfulness: il percorso del mese è solo descrittivo, una frase per settimana (salvata nel tema come approfondimenti con "settimana").
-function percorsoTesto(temi){
+function percorsoTesto(temi, k){
   const sett = [1,2,3,4].map(w => { for(const t of temi){ const a = (t.approfondimenti||[]).find(x => Number(x.settimana)===w); if(a) return a; } return null; });
   if(!sett.some(Boolean)) return st.canEdit ? `<div class="empty">Il percorso del mese si scrive nel tema del mese (Modifica → «Il percorso del mese»).</div>` : '';
   const cur = st.mese===MESE_OGGI ? Math.min(4, Math.ceil(new Date().getDate()/7)) : 0;
   return `<section class="group"><div class="group-head"><h2>Il percorso del mese</h2></div>
     <ol class="weeks">${sett.map((a,i) => `<li class="card week ${i+1===cur?'now':''}"><span class="eyebrow">Settimana ${i+1}${i+1===cur?' · adesso':''}</span>
-      ${a ? `${a.titolo ? `<h3>${esc(a.titolo)}</h3>` : ''}${a.testo ? `<div class="prose">${paras(a.testo)}</div>` : ''}` : `<p class="none">In preparazione</p>`}</li>`).join('')}</ol></section>`;
+      ${a ? `${a.immagine && st.urls[a.immagine] ? `<img class="week-img" src="${esc(st.urls[a.immagine])}" alt="${esc(a.titolo||'')}" loading="lazy">` : ''}${a.titolo ? `<h3>${esc(a.titolo)}</h3>` : ''}${a.testo ? `<div class="prose">${paras(a.testo)}</div>` : ''}` : `<p class="none">In preparazione</p>`}
+      ${i===3 && k==='posturale' ? lezioneLink(k) : ''}</li>`).join('')}</ol></section>`;
+}
+// La lezione del mese: quella registrata su Drive per questo mese; altrimenti l'ultimo video aggiunto a mano.
+function lezioneDelMese(k){
+  return st.lezioni.filter(l => l.sezione===k && l.mese===st.mese).sort(byNew)[0] || contDi(k,'video')[0] || null;
+}
+function lezioneLink(k){
+  const l = lezioneDelMese(k);
+  return l ? `<button class="btn primary" data-act="goto" data-id="${esc(l.id)}" data-tipo="video">${ICON.play} Guarda la lezione del mese</button>` : '';
 }
 function percorso(k){
   const items = st.contenuti.filter(c => c.sezione===k && c.mese===st.mese && c.settimana && c.tipo!=='diretta').sort((a,b)=>String(a.creato||'').localeCompare(String(b.creato||'')));
@@ -1043,9 +1055,11 @@ function viewSezione(k){
   const gMed = k==='mindfulness' ? group('La meditazione del mese', audio.slice(0,1), audioCard, 'La meditazione di questo mese arriverà presto.', 'audio', k)
     + (st.canEdit && audio.length > 1 ? `<p class="hint">Alle allieve si vede solo la meditazione più recente («${esc(audio[0].titolo)}»).</p>` : '') : '';
   const gB = group('Dal blog', art, x => articleCard(x,false), '', 'articolo', k);
+  const lezM = k==='posturale' ? lezioneDelMese(k) : null;
+  const gLez = k==='posturale' ? group('La lezione del mese', lezM ? [lezM] : [], videoCard, 'La lezione di questo mese viene registrata nella quarta settimana e arriverà qui.', 'video', k) : '';
   return hero(s.scena, `<div class="hero-row"><div class="hero-txt"><span class="eyebrow">${esc(s.nome)} · ${esc(meseLabel(st.mese))}</span>
       <h1>${titolo}</h1><p class="sub">${esc(sub)}</p>${addBtn('tema',k,'+ Tema del mese')}</div>${orb}</div>`)
-    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${k==='yoga' ? '' : k==='mindfulness' ? percorsoTesto(temi) + gMed : percorso(k)}${timerCard}${pausaCard}${k==='mindfulness' ? gB : gV+lezAnno(k)+gL+gB}</div>`;
+    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${k==='yoga' ? '' : k==='mindfulness' ? percorsoTesto(temi, k) + gMed : percorsoTesto(temi, k) + gLez}${timerCard}${pausaCard}${k==='mindfulness' ? gB : k==='posturale' ? gL+lezAnno(k, st.mese)+gB : gV+lezAnno(k)+gL+gB}</div>`;
 }
 function viewBlog(){
   const art = contDi(null,'articolo');
@@ -1551,10 +1565,8 @@ function openSheet(x, editing){
     <div class="field" data-for="tema articolo"><label for="f-testo">Testo</label><textarea id="f-testo" rows="8" placeholder="Lascia una riga vuota per iniziare un nuovo paragrafo">${esc(x.testo||'')}</textarea></div>
     <div class="field" data-for="tema"><label>Approfondimenti</label><div id="ap-list" style="display:flex;flex-direction:column;gap:10px"></div>
       <button type="button" class="btn" id="ap-add" style="align-self:flex-start">+ Aggiungi approfondimento</button></div>
-    <div class="field" data-for="tema" id="perc-box"><label>Il percorso del mese</label><span class="hint">Una breve descrizione per ogni settimana. Compare nella sezione Mindfulness.</span>
-      ${[1,2,3,4].map(w => { const a = (x.approfondimenti||[]).find(y => Number(y.settimana)===w) || {};
-        return `<div class="perc-sett"><b>Settimana ${w}</b><input class="inp" id="ps-t-${w}" aria-label="Titolo settimana ${w}" placeholder="Ascoltare il respiro" value="${esc(a.titolo||'')}">
-        <textarea class="inp ta" id="ps-x-${w}" rows="3" aria-label="Descrizione settimana ${w}" placeholder="Cosa proporre in questa settimana">${esc(a.testo||'')}</textarea></div>`; }).join('')}</div>
+    <div class="field" data-for="tema" id="perc-box"><label>Il percorso del mese</label><span class="hint">Una breve descrizione per ogni settimana, con un'immagine se vuoi. Compare in Posturale e in Mindfulness.</span>
+      <div id="perc-list" style="display:flex;flex-direction:column;gap:10px"></div></div>
     <div class="row2" data-for="diretta">
       <div class="field"><label for="f-quando">Data e ora</label><input type="datetime-local" id="f-quando" value="${esc(x.quando||'')}"></div>
       <div class="field"><label for="f-dove">Dove</label><input id="f-dove" value="${esc(x.dove||'')}" placeholder="In studio, oppure il link di Zoom o Meet"></div>
@@ -1576,6 +1588,7 @@ function openSheet(x, editing){
     <div class="sheet-actions"><button type="button" class="btn" id="f-cancel">Annulla</button><button type="submit" class="btn primary" id="f-save">Salva</button></div>
   </form></div>`;
   (x.approfondimenti||[]).filter(a => !a.settimana).forEach(a => addAp(a));
+  [1,2,3,4].forEach(w => addAp((x.approfondimenti||[]).find(y => Number(y.settimana)===w) || {}, w));
   syncFields(); showCurrentFile();
   $('#f-tipo').addEventListener('change', syncFields); $('#f-sez').addEventListener('change', syncFields);
   $('#ap-add').addEventListener('click', () => addAp({}));
@@ -1591,7 +1604,7 @@ function closeSheet(){ st.sheet=null; $('#sheet-host').innerHTML=''; document.re
 function syncFields(){
   const t = $('#f-tipo').value;
   document.querySelectorAll('#f [data-for]').forEach(el => el.hidden = !el.dataset.for.split(' ').includes(t));
-  const pb = $('#perc-box'); if(pb) pb.hidden = !(t==='tema' && $('#f-sez').value==='mindfulness');
+  const pb = $('#perc-box'); if(pb) pb.hidden = !(t==='tema' && ['mindfulness','posturale'].includes($('#f-sez').value));
   $('#f-filehint').textContent = t==='audio' ? 'File audio (.m4a dei Memo Vocali, .mp3), fino a 50 MB.' : 'Video brevi (.mp4, .mov), fino a 50 MB.';
 }
 function showCurrentFile(){
@@ -1601,20 +1614,23 @@ function showCurrentFile(){
   else el.textContent = '';
 }
 let apN = 0;
-function addAp(a){
-  const n = ++apN, row = document.createElement('div'); row.className = 'ap-row';
-  row.innerHTML = `<input class="inp ap-t" id="ap-t-${n}" aria-label="Titolo approfondimento" placeholder="Muladhara, il chakra della radice" value="${esc(a.titolo||'')}">
-    <textarea class="inp ta ap-x" id="ap-x-${n}" aria-label="Testo approfondimento" rows="4" placeholder="Testo dell'approfondimento">${esc(a.testo||'')}</textarea>
+const PH_SETT = ['', 'Ascoltare il corpo', 'Lavoro sulla colonna', 'Respiro e allineamento', 'Riepilogo e lezione registrata'];
+function addAp(a, settimana){
+  const n = ++apN, row = document.createElement('div'); row.className = 'ap-row' + (settimana ? ' perc-sett' : '');
+  const cosa = settimana ? 'settimana ' + settimana : 'approfondimento';
+  row.innerHTML = `${settimana ? `<b>Settimana ${settimana}</b>` : ''}<input class="inp ap-t" id="ap-t-${n}" aria-label="Titolo ${cosa}" placeholder="${settimana ? PH_SETT[settimana] : 'Muladhara, il chakra della radice'}" value="${esc(a.titolo||'')}">
+    <textarea class="inp ta ap-x" id="ap-x-${n}" aria-label="Testo ${cosa}" rows="${settimana ? 3 : 4}" placeholder="${settimana ? 'Cosa proponi in questa settimana' : 'Testo dell\'approfondimento'}">${esc(a.testo||'')}</textarea>
     <div class="ap-file"><span class="ap-cur">${a.immagine && st.urls[a.immagine] ? `<img class="ap-prev" src="${esc(st.urls[a.immagine])}" alt="">` : ''}</span>
       <label class="btn" for="ap-i-${n}">${a.immagine ? 'Cambia immagine' : '+ Immagine'}</label><input type="file" id="ap-i-${n}" accept="image/*" hidden>
       ${a.immagine ? '<button type="button" class="btn ap-noimg">Togli immagine</button>' : ''}</div>
-    <button type="button" class="btn danger ap-del">Togli approfondimento</button>`;
+    ${settimana ? '' : '<button type="button" class="btn danger ap-del">Togli approfondimento</button>'}`;
   row.dataset.immagine = a.immagine || '';
-  row.querySelector('.ap-del').addEventListener('click', () => row.remove());
+  if(settimana) row.dataset.settimana = settimana;
+  else row.querySelector('.ap-del').addEventListener('click', () => row.remove());
   row.querySelector('input[type=file]').addEventListener('change', e => { const f = e.target.files[0]; if(!f) return;
     row._file = f; row.querySelector('.ap-cur').innerHTML = `<img class="ap-prev" src="${URL.createObjectURL(f)}" alt="">`; });
   const no = row.querySelector('.ap-noimg'); if(no) no.addEventListener('click', () => { row.dataset.immagine = ''; row._file = null; row.querySelector('.ap-cur').innerHTML = '<small>Immagine tolta</small>'; no.remove(); });
-  $('#ap-list').appendChild(row);
+  (settimana ? $('#perc-list') : $('#ap-list')).appendChild(row);
 }
 function uploadType(f){
   const n = (f.name||'').toLowerCase(), t = f.type || '';
@@ -1654,9 +1670,10 @@ async function save(){
   const data = {sezione:$('#f-sez').value, mese, titolo, esempio:false, aggiornato:new Date().toISOString()};
   if(tipo==='tema'){
     data.sottotitolo = $('#f-sotto').value.trim(); data.testo = $('#f-testo').value.trim();
-    data.approfondimenti = [...document.querySelectorAll('.ap-row')].map(r => ({titolo:r.querySelector('.ap-t').value.trim(), testo:r.querySelector('.ap-x').value.trim(), immagine:r.dataset.immagine || null, _row:r})).filter(a => a.titolo||a.testo||a._row._file||a.immagine);
-    if(data.sezione==='mindfulness') [1,2,3,4].forEach(w => { const titolo = $('#ps-t-'+w).value.trim(), testo = $('#ps-x-'+w).value.trim();
-      if(titolo || testo) data.approfondimenti.push({settimana:w, titolo, testo}); });
+    const conPercorso = ['mindfulness','posturale'].includes(data.sezione);
+    data.approfondimenti = [...document.querySelectorAll('.ap-row')].filter(r => conPercorso || !r.dataset.settimana)
+      .map(r => Object.assign(r.dataset.settimana ? {settimana:Number(r.dataset.settimana)} : {}, {titolo:r.querySelector('.ap-t').value.trim(), testo:r.querySelector('.ap-x').value.trim(), immagine:r.dataset.immagine || null, _row:r}))
+      .filter(a => a.titolo||a.testo||a._row._file||a.immagine);
   } else {
     data.tipo = tipo; data.descrizione = $('#f-desc').value.trim();
     if(tipo==='articolo') data.testo = $('#f-testo').value.trim();
