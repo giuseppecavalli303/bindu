@@ -63,6 +63,7 @@ I file nel bucket `media` sono privati: il sito li mostra con URL firmati (`crea
 - **La mail della domenica**: ogni domenica verso le 18 il programma Google manda a ogni allieva (colonna `allieve.mail_settimanale`, che l'allieva cambia dal suo profilo) un riepilogo caldo del mandala del mese, firmato Tiziana: anelli della settimana, colori, minuti, un cerchio colorato per pratica. I dati arrivano dalla funzione SQL `riepilogo_mandala(mese)`, eseguibile solo con la chiave segreta. Il tono incoraggia senza colpevolizzare.
 - **L'anno scolastico**: va da ottobre a giugno. Luglio, agosto e settembre le lezioni registrate sono chiuse. Il 1° luglio inizia il nuovo anno scolastico (le lezioni caricate a settembre compaiono dal 1° ottobre).
 - **Sezioni**: Yoga e Posturale non hanno il percorso del mese (Yoga) né le meditazioni guidate (solo in Mindfulness). Gli approfondimenti del tema possono avere un'immagine (`approfondimenti[].immagine`, file in `media/temi/`, ridotta a 1600 px nel browser).
+- **Pagina d'ingresso**: in alto a destra c'è `tiziana.png`, Tiziana seduta sul mandala, scontornata e con il telo ricolorato dal blu ai toni lilla/malva dell'app. Ha un alone lilla e un'ombra morbida (`.login-foto`) e si rimpicciolisce quando si scorre.
 - **Grafica**: paesaggi pastello rosa e viola disegnati in SVG (alba = yoga, lago = posturale, notte = mindfulness), font Marcellus + Figtree, tema chiaro e scuro tramite variabili CSS in `:root`. Logo: fiore di loto sopra le vertebre (colonna e loto).
 - **Lingua**: interfaccia in italiano, tono caldo e semplice.
 

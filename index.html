@@ -273,6 +273,20 @@ details .prose{padding:0 16px 16px}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .login-page{--bg:#211B23;--surface:#2C2430;--ink:#F6ECF2;--muted:#CEC0CA;--line:#584958;--login-accent:#E0AEC9;--login-button:#DDB4CE;--login-button-text:#302033}}
 :root[data-theme="dark"] .login-page{--bg:#211B23;--surface:#2C2430;--ink:#F6ECF2;--muted:#CEC0CA;--line:#584958;--login-accent:#E0AEC9;--login-button:#DDB4CE;--login-button-text:#302033}
 .login-page .top{color:var(--ink);background:var(--bg)}
+/* Tiziana sul mandala, nell'intestazione della pagina d'ingresso */
+.login-foto{display:none}
+.login-page .login-foto{display:block;position:relative;margin-left:auto;width:clamp(132px, 36vw, 230px);aspect-ratio:520/364;isolation:isolate;
+  transition:width .45s ease;animation:foto-in 1.8s cubic-bezier(.2,.7,.2,1) both}
+.login-foto::before{content:"";position:absolute;z-index:-1;left:50%;top:48%;width:118%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle closest-side, color-mix(in srgb, var(--lilac) 62%, transparent) 0%, color-mix(in srgb, var(--rose) 30%, transparent) 40%, color-mix(in srgb, var(--peach) 10%, transparent) 70%, transparent 100%);
+  filter:blur(14px);opacity:.85;animation:alone 9s ease-in-out infinite}
+.login-foto::after{content:"";position:absolute;z-index:-1;left:4%;right:4%;bottom:-3%;height:18%;border-radius:50%;
+  background:radial-gradient(ellipse at center, color-mix(in srgb, var(--ink) 30%, transparent), transparent 70%);filter:blur(4px)}
+.login-foto img{display:block;width:100%;height:auto;filter:saturate(.9) drop-shadow(0 3px 4px color-mix(in srgb, var(--ink) 18%, transparent))}
+.login-page .top.solid .login-foto{width:84px}
+@keyframes foto-in{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes alone{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.06)}}
+@media (prefers-reduced-motion: reduce){ .login-page .login-foto,.login-foto::before{animation:none} .login-page .login-foto{transition:none} }
 .login-page .brand svg{width:46px;height:46px}
 .login-page .brand b{font-size:1.8rem}
 .login-page .brand small{display:block;font-size:.63rem;letter-spacing:.1em}
@@ -458,6 +472,7 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
       </svg>
       <span class="brand-txt"><b>Mandala</b><small>Pratica con Tiziana</small></span>
     </a>
+    <span class="login-foto" aria-hidden="true"><img src="tiziana.png" alt="" width="520" height="364" decoding="async"></span>
     <nav class="navtop" id="navtop" aria-label="Sezioni"></nav>
     <label class="mese-pick" for="mese"><span class="sr">Mese</span><select id="mese"></select></label>
     <a class="pill-teacher" id="pill" href="#account" hidden>Insegnante</a>
