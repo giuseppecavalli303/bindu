@@ -191,6 +191,7 @@ function supabase(chiave, metodo, percorso, corpo, extra) {
 
 const SITO = 'https://mandala.yogacontiziana.it/';
 const INSEGNANTE = 'yogacontiziana@gmail.com';
+const RISPOSTE = 'tiziana@yogacontiziana.it'; // le risposte delle allieve arrivano qui
 const TINTE = {
   yoga:        { nome: 'Yoga',        chiaro: '#F5C4D8', scuro: '#A8457A' },
   posturale:   { nome: 'Posturale',   chiaro: '#CFCCF4', scuro: '#5650A6' },
@@ -241,7 +242,7 @@ function inviaRiepiloghi(prova) {
       htmlBody: m.html,
       body: m.testo,
       name: 'Tiziana · Mandala',
-      replyTo: INSEGNANTE,
+      replyTo: RISPOSTE,
       inlineImages: m.immagine ? { mandala: m.immagine } : undefined
     });
     inviate++;
