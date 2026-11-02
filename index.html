@@ -238,6 +238,10 @@ details .prose{padding:0 16px 16px}
 .week button svg{width:16px;height:16px;flex:none;margin-top:3px;color:var(--sez);opacity:.4}
 .week button.ok svg{opacity:1}
 .week button small{display:block;color:var(--muted);font-size:.76rem;font-weight:400}
+.week h3{font-family:var(--body);font-size:1rem;font-weight:700;line-height:1.3}
+.week .prose{font-size:.92rem;color:var(--muted);line-height:1.55}
+.week .prose p+p{margin-top:.5em}
+.perc-sett{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--line);border-radius:14px}
 .week .none{font-size:.86rem;color:var(--muted)}
 /* Practice calendar */
 .cal{display:grid;grid-template-columns:repeat(7, 28px);gap:4px;font-size:.72rem;font-variant-numeric:tabular-nums}
@@ -949,6 +953,15 @@ function liveCard(x){
     <p class="when">${fmtQuando(x.quando)}${x.durata ? ' · '+esc(x.durata) : ''}</p>${dove ? `<p class="when">${dove}</p>` : ''}
     ${x.descrizione ? `<p class="desc">${esc(x.descrizione)}</p>` : ''}${Date.parse(x.quando) <= Date.now() ? `<div class="foot">${st.canEdit ? presBtn(x) : doneBtn(x, 'Ero presente', 'Presente')}</div>` : ''}${tools('contenuti',x)}</div></article>`;
 }
+// Mindfulness: il percorso del mese è solo descrittivo, una frase per settimana (salvata nel tema come approfondimenti con "settimana").
+function percorsoTesto(temi){
+  const sett = [1,2,3,4].map(w => { for(const t of temi){ const a = (t.approfondimenti||[]).find(x => Number(x.settimana)===w); if(a) return a; } return null; });
+  if(!sett.some(Boolean)) return st.canEdit ? `<div class="empty">Il percorso del mese si scrive nel tema del mese (Modifica → «Il percorso del mese»).</div>` : '';
+  const cur = st.mese===MESE_OGGI ? Math.min(4, Math.ceil(new Date().getDate()/7)) : 0;
+  return `<section class="group"><div class="group-head"><h2>Il percorso del mese</h2></div>
+    <ol class="weeks">${sett.map((a,i) => `<li class="card week ${i+1===cur?'now':''}"><span class="eyebrow">Settimana ${i+1}${i+1===cur?' · adesso':''}</span>
+      ${a ? `${a.titolo ? `<h3>${esc(a.titolo)}</h3>` : ''}${a.testo ? `<div class="prose">${paras(a.testo)}</div>` : ''}` : `<p class="none">In preparazione</p>`}</li>`).join('')}</ol></section>`;
+}
 function percorso(k){
   const items = st.contenuti.filter(c => c.sezione===k && c.mese===st.mese && c.settimana && c.tipo!=='diretta').sort((a,b)=>String(a.creato||'').localeCompare(String(b.creato||'')));
   if(!items.length) return '';
@@ -1011,7 +1024,7 @@ function viewSezione(k){
   const temaCard = temi.length ? `<section class="card tema-card">${temi.map(t => `<div class="tema">
       ${temi.length>1 ? `<h2>${esc(t.titolo)}</h2>` : ''}${badge(t) ? `<div>${badge(t)}</div>` : ''}
       ${t.testo ? `<div class="prose">${paras(t.testo)}</div>` : ''}
-      ${(t.approfondimenti||[]).length ? `<div class="approf"><h3>Approfondimenti</h3>${t.approfondimenti.map(a => `<details><summary>${esc(a.titolo||'Approfondimento')}</summary><div class="prose">${a.immagine && st.urls[a.immagine] ? `<img class="ap-img" src="${esc(st.urls[a.immagine])}" alt="${esc(a.didascalia || a.titolo || '')}" loading="lazy">` : ''}${paras(a.testo)}</div></details>`).join('')}</div>` : ''}
+      ${(t.approfondimenti||[]).some(a => !a.settimana) ? `<div class="approf"><h3>Approfondimenti</h3>${t.approfondimenti.filter(a => !a.settimana).map(a => `<details><summary>${esc(a.titolo||'Approfondimento')}</summary><div class="prose">${a.immagine && st.urls[a.immagine] ? `<img class="ap-img" src="${esc(st.urls[a.immagine])}" alt="${esc(a.didascalia || a.titolo || '')}" loading="lazy">` : ''}${paras(a.testo)}</div></details>`).join('')}</div>` : ''}
       ${tools('temi',t)}</div>`).join('')}</section>` : '';
   const timerCard = k==='mindfulness' && st.mese===MESE_OGGI ? `<section class="card timer-card s-mind"><div class="tc-art">${sceneSvg('notte')}<div class="orb" aria-hidden="true"></div></div>
       <div class="body"><span class="eyebrow">Pratica libera</span><h2 style="font-size:1.6rem">Silenzio con campana</h2>
@@ -1027,10 +1040,12 @@ function viewSezione(k){
   const video = contDi(k,'video'), audio = contDi(k,'audio'), art = contDi(k,'articolo');
   const gV = group('Lezioni del mese', video, videoCard, k!=='mindfulness' && !lezDi(k).length ? 'Le registrazioni delle lezioni di questo mese appariranno qui.' : '', 'video', k);
   const gA = group('Meditazioni guidate', audio, audioCard, k==='mindfulness' ? 'Le meditazioni guidate di questo mese appariranno qui.' : '', 'audio', k);
+  const gMed = k==='mindfulness' ? group('La meditazione del mese', audio.slice(0,1), audioCard, 'La meditazione di questo mese arriverà presto.', 'audio', k)
+    + (st.canEdit && audio.length > 1 ? `<p class="hint">Alle allieve si vede solo la meditazione più recente («${esc(audio[0].titolo)}»).</p>` : '') : '';
   const gB = group('Dal blog', art, x => articleCard(x,false), '', 'articolo', k);
   return hero(s.scena, `<div class="hero-row"><div class="hero-txt"><span class="eyebrow">${esc(s.nome)} · ${esc(meseLabel(st.mese))}</span>
       <h1>${titolo}</h1><p class="sub">${esc(sub)}</p>${addBtn('tema',k,'+ Tema del mese')}</div>${orb}</div>`)
-    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${k==='yoga' ? '' : percorso(k)}${timerCard}${pausaCard}${k==='mindfulness' ? gA+gV+gL+gB : gV+lezAnno(k)+gL+gB}</div>`;
+    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${k==='yoga' ? '' : k==='mindfulness' ? percorsoTesto(temi) + gMed : percorso(k)}${timerCard}${pausaCard}${k==='mindfulness' ? gB : gV+lezAnno(k)+gL+gB}</div>`;
 }
 function viewBlog(){
   const art = contDi(null,'articolo');
@@ -1536,6 +1551,10 @@ function openSheet(x, editing){
     <div class="field" data-for="tema articolo"><label for="f-testo">Testo</label><textarea id="f-testo" rows="8" placeholder="Lascia una riga vuota per iniziare un nuovo paragrafo">${esc(x.testo||'')}</textarea></div>
     <div class="field" data-for="tema"><label>Approfondimenti</label><div id="ap-list" style="display:flex;flex-direction:column;gap:10px"></div>
       <button type="button" class="btn" id="ap-add" style="align-self:flex-start">+ Aggiungi approfondimento</button></div>
+    <div class="field" data-for="tema" id="perc-box"><label>Il percorso del mese</label><span class="hint">Una breve descrizione per ogni settimana. Compare nella sezione Mindfulness.</span>
+      ${[1,2,3,4].map(w => { const a = (x.approfondimenti||[]).find(y => Number(y.settimana)===w) || {};
+        return `<div class="perc-sett"><b>Settimana ${w}</b><input class="inp" id="ps-t-${w}" aria-label="Titolo settimana ${w}" placeholder="Ascoltare il respiro" value="${esc(a.titolo||'')}">
+        <textarea class="inp ta" id="ps-x-${w}" rows="3" aria-label="Descrizione settimana ${w}" placeholder="Cosa proporre in questa settimana">${esc(a.testo||'')}</textarea></div>`; }).join('')}</div>
     <div class="row2" data-for="diretta">
       <div class="field"><label for="f-quando">Data e ora</label><input type="datetime-local" id="f-quando" value="${esc(x.quando||'')}"></div>
       <div class="field"><label for="f-dove">Dove</label><input id="f-dove" value="${esc(x.dove||'')}" placeholder="In studio, oppure il link di Zoom o Meet"></div>
@@ -1556,9 +1575,9 @@ function openSheet(x, editing){
     <p class="form-err" id="f-err" hidden></p>
     <div class="sheet-actions"><button type="button" class="btn" id="f-cancel">Annulla</button><button type="submit" class="btn primary" id="f-save">Salva</button></div>
   </form></div>`;
-  (x.approfondimenti||[]).forEach(a => addAp(a));
+  (x.approfondimenti||[]).filter(a => !a.settimana).forEach(a => addAp(a));
   syncFields(); showCurrentFile();
-  $('#f-tipo').addEventListener('change', syncFields);
+  $('#f-tipo').addEventListener('change', syncFields); $('#f-sez').addEventListener('change', syncFields);
   $('#ap-add').addEventListener('click', () => addAp({}));
   $('#f-close').addEventListener('click', closeSheet); $('#f-cancel').addEventListener('click', closeSheet);
   $('#sheet-bg').addEventListener('click', e => { if(e.target.id==='sheet-bg') closeSheet(); });
@@ -1572,6 +1591,7 @@ function closeSheet(){ st.sheet=null; $('#sheet-host').innerHTML=''; document.re
 function syncFields(){
   const t = $('#f-tipo').value;
   document.querySelectorAll('#f [data-for]').forEach(el => el.hidden = !el.dataset.for.split(' ').includes(t));
+  const pb = $('#perc-box'); if(pb) pb.hidden = !(t==='tema' && $('#f-sez').value==='mindfulness');
   $('#f-filehint').textContent = t==='audio' ? 'File audio (.m4a dei Memo Vocali, .mp3), fino a 50 MB.' : 'Video brevi (.mp4, .mov), fino a 50 MB.';
 }
 function showCurrentFile(){
@@ -1635,6 +1655,8 @@ async function save(){
   if(tipo==='tema'){
     data.sottotitolo = $('#f-sotto').value.trim(); data.testo = $('#f-testo').value.trim();
     data.approfondimenti = [...document.querySelectorAll('.ap-row')].map(r => ({titolo:r.querySelector('.ap-t').value.trim(), testo:r.querySelector('.ap-x').value.trim(), immagine:r.dataset.immagine || null, _row:r})).filter(a => a.titolo||a.testo||a._row._file||a.immagine);
+    if(data.sezione==='mindfulness') [1,2,3,4].forEach(w => { const titolo = $('#ps-t-'+w).value.trim(), testo = $('#ps-x-'+w).value.trim();
+      if(titolo || testo) data.approfondimenti.push({settimana:w, titolo, testo}); });
   } else {
     data.tipo = tipo; data.descrizione = $('#f-desc').value.trim();
     if(tipo==='articolo') data.testo = $('#f-testo').value.trim();
@@ -1657,7 +1679,7 @@ async function save(){
   try{
     if(tipo==='tema'){
       for(const a of data.approfondimenti){
-        const f = a._row._file; delete a._row;
+        const f = a._row && a._row._file; delete a._row;
         if(f){ btn.textContent = 'Caricamento dell\'immagine…';
           const img = await riduciImmagine(f), path = 'temi/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.jpg';
           const up = await st.sb.storage.from('media').upload(path, img, {contentType:img.type || 'image/jpeg', upsert:false});
