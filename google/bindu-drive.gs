@@ -1,11 +1,11 @@
 /**
- * Bindu · lezioni da Google Drive
+ * Mandala · lezioni da Google Drive
  *
  * Gira nell'account Google dell'insegnante (script.google.com), ogni 10 minuti.
  * - Legge le cartelle "Lezioni di Yoga online" e "Lezioni di Posturale online"
  *   (anche le sottocartelle) e scrive i video nella tabella `lezioni` di Supabase.
  * - Da ottobre a giugno condivide con "chiunque abbia il link" solo i video
- *   dell'anno scolastico in corso, così si vedono dentro Bindu.
+ *   dell'anno scolastico in corso, così si vedono dentro Mandala.
  *   A luglio, agosto e settembre, e per gli anni passati, li rende privati.
  *   Le due cartelle restano private (i link valgono solo per i singoli video).
  *
@@ -31,7 +31,7 @@ function installa() {
   sincronizza();
 }
 
-/** Il giro di controllo: Drive → Bindu, e condivisione dei video. */
+/** Il giro di controllo: Drive → Mandala, e condivisione dei video. */
 function sincronizza() {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(1000)) return;
@@ -74,7 +74,7 @@ function sincronizza() {
         supabase(chiave, 'post', '/rest/v1/lezioni?on_conflict=drive_id', righe,
           { Prefer: 'resolution=merge-duplicates,return=minimal' });
       }
-      // Toglie da Bindu i video spostati o cancellati da questa cartella.
+      // Toglie da Mandala i video spostati o cancellati da questa cartella.
       const ids = righe.map(r => '"' + r.drive_id.replace(/"/g, '') + '"').join(',');
       const filtro = '/rest/v1/lezioni?sezione=eq.' + sezione + (ids ? '&drive_id=not.in.(' + encodeURIComponent(ids) + ')' : '');
       supabase(chiave, 'delete', filtro, null, { Prefer: 'return=minimal' });
@@ -240,7 +240,7 @@ function inviaRiepiloghi(prova) {
       subject: (prova ? '[Anteprima per ' + (a.nome || a.email) + '] ' : '') + m.oggetto,
       htmlBody: m.html,
       body: m.testo,
-      name: 'Tiziana · Bindu',
+      name: 'Tiziana · Mandala',
       replyTo: INSEGNANTE,
       inlineImages: m.immagine ? { mandala: m.immagine } : undefined
     });
@@ -299,7 +299,7 @@ function componiMail(a, oggi, mese) {
     + '<p style="margin:24px 0 8px;text-align:center"><a href="' + SITO + '" style="display:inline-block;background:#3B2D4D;color:#FFFFFF;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px">Apri il tuo mandala</a></p>'
     + '<p style="margin:22px 0 0;font-size:15px;line-height:1.55">Con affetto,<br>Tiziana</p>'
     + '</div>'
-    + '<p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.5;color:#7A6B8A;text-align:center">Ricevi questa mail ogni domenica perché pratichi con Bindu. Se non vuoi più riceverla, apri Bindu, tocca il tuo profilo in alto a destra e togli la spunta da «La mail della domenica».</p>'
+    + '<p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.5;color:#7A6B8A;text-align:center">Ricevi questa mail ogni domenica perché pratichi con Mandala. Se non vuoi più riceverla, apri Mandala, tocca il tuo profilo in alto a destra e togli la spunta da «La mail della domenica».</p>'
     + '</div>';
   const testo = (nome ? 'Ciao ' + nome + ',' : 'Ciao,') + '\n\n' + apertura + '\n\n' + extra.join('\n\n') + (extra.length ? '\n\n' : '')
     + 'Apri il tuo mandala: ' + SITO + '\n\nCon affetto,\nTiziana';

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Bindu</title>
-<meta name="description" content="Bindu: yoga, posturale e mindfulness con Tiziana. Lezioni, letture e meditazioni del mese.">
+<title>Mandala</title>
+<meta name="description" content="Mandala: yoga, posturale e mindfulness con Tiziana. Lezioni, letture e meditazioni del mese.">
 <meta name="theme-color" content="#FAF7F0">
 <link rel="manifest" href="manifest.webmanifest?v=2">
 <link rel="icon" href="icona.svg?v=2" type="image/svg+xml">
 <link rel="apple-touch-icon" sizes="180x180" href="icona-180.png?v=2">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Bindu">
+<meta name="apple-mobile-web-app-title" content="Mandala">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@300;400;500;600;700&display=swap">
@@ -389,6 +389,14 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 .pres-tools .btn{padding:5px 11px;font-size:.8rem}
 .done.segnata{cursor:default}
 .diario .da{font-size:.76rem;color:var(--muted);grid-column:2}
+.or-f{display:flex;flex-direction:column;gap:12px;padding-top:12px;border-top:1px solid var(--line)}
+.or-f h3{font-family:var(--body);font-size:1rem;font-weight:700}
+.al-list .m-btns{flex-direction:row;flex-wrap:nowrap;flex:none;gap:6px}
+.al-list .btn{white-space:nowrap}
+@media (max-width:480px){ .al-list li{flex-wrap:wrap} .al-list li > span:first-child{flex:1 1 100%} }
+.ap-img{display:block;width:100%;max-height:420px;object-fit:cover;border-radius:14px;margin:0 0 12px}
+.ap-row .ap-prev{max-width:160px;border-radius:10px;display:block}
+.ap-file{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
 .mail-pref{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
 .mail-pref input{width:22px;height:22px;accent-color:var(--lilac-ink);flex:none;margin-top:2px}
 /* Video rivisto */
@@ -443,12 +451,12 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 <body>
 <header class="top" id="top">
   <div class="wrap">
-    <a class="brand" href="#home" aria-label="Bindu, home">
+    <a class="brand" href="#home" aria-label="Mandala, home">
       <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
         <g class="lm-p"><path d="M20 2.5c3.2 3.2 3.6 7.4 0 12-3.6-4.6-3.2-8.8 0-12Z"/><path d="M18.8 14.6c-3.8-.4-7.4-2.8-9.4-6.8 4.4 0 8 2.5 9.4 6.8Z"/><path d="M21.2 14.6c3.8-.4 7.4-2.8 9.4-6.8-4.4 0-8 2.5-9.4 6.8Z"/></g>
         <g class="lm-v"><rect x="16" y="17.4" width="8" height="3.8" rx="1.9"/><rect x="15.2" y="22.6" width="9.6" height="3.8" rx="1.9"/><rect x="14.8" y="27.8" width="10.4" height="3.8" rx="1.9"/><rect x="15.8" y="33" width="8.4" height="3.6" rx="1.8"/></g>
       </svg>
-      <span class="brand-txt"><b>Bindu</b><small>Pratica con Tiziana</small></span>
+      <span class="brand-txt"><b>Mandala</b><small>Pratica con Tiziana</small></span>
     </a>
     <nav class="navtop" id="navtop" aria-label="Sezioni"></nav>
     <label class="mese-pick" for="mese"><span class="sr">Mese</span><select id="mese"></select></label>
@@ -553,7 +561,7 @@ function sceneSvg(kind){
 const curMonth = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
 const MESE_OGGI = curMonth();
 const LS = 'pdm-pratica-v1';
-const st = {temi:[], contenuti:[], lezioni:[], presenze:[], mailSett:null, mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
+const st = {temi:[], contenuti:[], lezioni:[], orario:[], orEdit:null, presenze:[], mailSett:null, mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
   loading:true, offline:false, armed:null, done:{}, uid:null, pRef:null, pLoaded:false, localOnly:false,
   pQueue:Promise.resolve(), dirty:false, tmin:10, scene:'alba',
   sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[],
@@ -594,6 +602,26 @@ function annoScol(d){ const m = d.getMonth()+1, y = d.getFullYear(), a = m>=7 ? 
 const lezioniAperte = () => ![7,8,9].includes(new Date().getMonth()+1);
 const LZ = l => ({id:'lz-'+l.drive_id, tipo:'video', lezione:true, sezione:l.sezione, titolo:l.titolo, durata:l.durata, link:l.link, mese:l.mese, anno:l.anno, creato:l.caricata});
 const lezDi = k => st.lezioni.filter(l => l.sezione===k && l.anno===annoScol(new Date()));
+const GIORNI = ['', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+// Le lezioni dell'orario settimanale diventano lezioni dal vivo con una data (da 14 giorni fa a 3 settimane avanti), da ottobre a giugno.
+function lezioniOrario(){
+  const out = [], oggi = new Date();
+  for(let d = -14; d <= 21; d++){
+    const g = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + d);
+    if([7,8,9].includes(g.getMonth()+1)) continue;
+    const gi = (g.getDay()+6)%7 + 1, day = isoDay(g);
+    st.orario.filter(o => Number(o.giorno)===gi).forEach(o => {
+      const [h1,m1] = String(o.inizio).split(':').map(Number), [h2,m2] = String(o.fine).split(':').map(Number), dur = (h2*60+m2) - (h1*60+m1);
+      out.push({id:'or-'+o.id+'-'+day, tipo:'diretta', ricorrente:true, sezione:o.sezione, titolo:o.titolo, quando:day+'T'+o.inizio, durata: dur>0 ? dur+' min' : '', dove:o.dove||'', mese:day.slice(0,7), creato:''});
+    });
+  }
+  return out;
+}
+function orarioTesto(k){
+  const righe = st.orario.filter(o => o.sezione===k);
+  const per = {}; righe.forEach(o => { const t = o.inizio+'–'+o.fine; (per[t] = per[t] || []).push(Number(o.giorno)); });
+  return Object.entries(per).map(([t,gg]) => gg.sort().map(g => GIORNI[g].toLowerCase()).join(' e ') + ' ' + t).join(' · ');
+}
 const findItem = id => st.contenuti.find(c => c.id===id) || st.lezioni.find(l => l.id===id);
 const cap = t => String(t).charAt(0).toUpperCase() + String(t).slice(1);
 const isoDay = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -793,7 +821,7 @@ function hero(kind, inner, cls){
 }
 const badge = x => x.esempio ? ' <span class="badge">Esempio</span>' : '';
 function tools(col, x){
-  if(!st.canEdit || x.lezione) return '';
+  if(!st.canEdit || x.lezione || x.ricorrente) return '';
   const armed = st.armed === col+'/'+x.id;
   return `<div class="tools"><button class="btn" data-act="edit" data-col="${col}" data-id="${esc(x.id)}">Modifica</button>
     <button class="btn danger ${armed?'armed':''}" data-act="del" data-col="${col}" data-id="${esc(x.id)}">${armed?'Conferma eliminazione':'Elimina'}</button></div>`;
@@ -968,7 +996,7 @@ function viewSezione(k){
   const temaCard = temi.length ? `<section class="card tema-card">${temi.map(t => `<div class="tema">
       ${temi.length>1 ? `<h2>${esc(t.titolo)}</h2>` : ''}${badge(t) ? `<div>${badge(t)}</div>` : ''}
       ${t.testo ? `<div class="prose">${paras(t.testo)}</div>` : ''}
-      ${(t.approfondimenti||[]).length ? `<div class="approf"><h3>Approfondimenti</h3>${t.approfondimenti.map(a => `<details><summary>${esc(a.titolo||'Approfondimento')}</summary><div class="prose">${paras(a.testo)}</div></details>`).join('')}</div>` : ''}
+      ${(t.approfondimenti||[]).length ? `<div class="approf"><h3>Approfondimenti</h3>${t.approfondimenti.map(a => `<details><summary>${esc(a.titolo||'Approfondimento')}</summary><div class="prose">${a.immagine && st.urls[a.immagine] ? `<img class="ap-img" src="${esc(st.urls[a.immagine])}" alt="${esc(a.didascalia || a.titolo || '')}" loading="lazy">` : ''}${paras(a.testo)}</div></details>`).join('')}</div>` : ''}
       ${tools('temi',t)}</div>`).join('')}</section>` : '';
   const timerCard = k==='mindfulness' && st.mese===MESE_OGGI ? `<section class="card timer-card s-mind"><div class="tc-art">${sceneSvg('notte')}<div class="orb" aria-hidden="true"></div></div>
       <div class="body"><span class="eyebrow">Pratica libera</span><h2 style="font-size:1.6rem">Silenzio con campana</h2>
@@ -978,8 +1006,8 @@ function viewSezione(k){
       <div class="body"><span class="eyebrow">Ogni giorno</span><h2 style="font-size:1.6rem">Pausa posturale</h2>
       <p class="muted">Due minuti guidati per sciogliere collo, spalle e schiena dopo tante ore alla scrivania. Un suono leggero segna ogni passaggio.</p>
       <div class="foot"><button class="btn primary" data-act="pausa">Inizia la pausa</button></div></div></section>` : '';
-  const live = prossime(k);
-  const gL = (live.length || st.canEdit) ? `<section class="group"><div class="group-head"><h2>Dal vivo</h2>${addBtn('diretta',k,'+ Lezione dal vivo')}</div>
+  const live = prossime(k).slice(0,4), ot = orarioTesto(k);
+  const gL = (live.length || st.canEdit) ? `<section class="group"><div class="group-head"><h2>Dal vivo</h2>${ot ? `<span class="muted">Ogni ${esc(ot)}</span>` : ''}${addBtn('diretta',k,'+ Lezione dal vivo')}</div>
     ${live.length ? `<div class="lives">${live.map(liveCard).join('')}</div>` : `<div class="empty">Nessuna lezione in calendario.</div>`}</section>` : '';
   const video = contDi(k,'video'), audio = contDi(k,'audio'), art = contDi(k,'articolo');
   const gV = group('Lezioni del mese', video, videoCard, k!=='mindfulness' && !lezDi(k).length ? 'Le registrazioni delle lezioni di questo mese appariranno qui.' : '', 'video', k);
@@ -987,7 +1015,7 @@ function viewSezione(k){
   const gB = group('Dal blog', art, x => articleCard(x,false), '', 'articolo', k);
   return hero(s.scena, `<div class="hero-row"><div class="hero-txt"><span class="eyebrow">${esc(s.nome)} · ${esc(meseLabel(st.mese))}</span>
       <h1>${titolo}</h1><p class="sub">${esc(sub)}</p>${addBtn('tema',k,'+ Tema del mese')}</div>${orb}</div>`)
-    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${percorso(k)}${timerCard}${pausaCard}${k==='mindfulness' ? gA+gV+gL+gB : gV+lezAnno(k)+gA+gL+gB}</div>`;
+    + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${k==='yoga' ? '' : percorso(k)}${timerCard}${pausaCard}${k==='mindfulness' ? gA+gV+gL+gB : gV+lezAnno(k)+gL+gB}</div>`;
 }
 function viewBlog(){
   const art = contDi(null,'articolo');
@@ -1015,7 +1043,7 @@ function render(force){
   document.body.classList.toggle('gate', !st.session || !st.member);
   document.body.classList.toggle('login-page', st.configured && st.authReady && !st.session);
   if(!st.configured) html = viewSetup();
-  else if(!st.authReady) html = hero('alba', `<span class="eyebrow">Bindu</span><h1>Un momento…</h1>`);
+  else if(!st.authReady) html = hero('alba', `<span class="eyebrow">Mandala</span><h1>Un momento…</h1>`);
   else if(!st.session) html = viewLogin();
   else if(!st.member) html = viewNonInvitata();
   else if(r==='account') html = viewAccount();
@@ -1138,7 +1166,7 @@ function openPresenze(base){
   const lista = st.allieve.length ? `<div class="pres-tools"><span class="lbl" id="ps-al">Chi era presente?</span><button type="button" class="btn" data-ps="tutte">Tutte</button><button type="button" class="btn" data-ps="nessuna">Nessuna</button></div>
       <ul class="pres-list" role="group" aria-labelledby="ps-al">${st.allieve.map(a => `<li><label><input type="checkbox" value="${esc(a.id)}" ${presenti.has(a.id)?'checked':''}>
         <span>${esc(a.nome || a.email || ('+'+a.telefono))}${a.nome && a.email ? `<small>${esc(a.email)}</small>` : ''}</span></label></li>`).join('')}</ul>`
-    : `<div class="empty">Non ci sono ancora allieve. Aggiungile in <a href="#account">Gestisci Bindu</a>.</div>`;
+    : `<div class="empty">Non ci sono ancora allieve. Aggiungile in <a href="#account">Gestisci Mandala</a>.</div>`;
   $('#sheet-host').innerHTML = `<div class="sheet-bg" id="ps-bg"><form class="sheet ${COLORE[base.sezione]||''}" id="ps-f" role="dialog" aria-modal="true" aria-labelledby="ps-t" novalidate>
     <div class="sheet-head"><h2 id="ps-t">Segna le presenze</h2><button type="button" class="btn" id="ps-x">Chiudi</button></div>
     ${campi}
@@ -1404,6 +1432,14 @@ document.addEventListener('click', async e => {
   else if(act==='timer') openTimer();
   else if(act==='registra') openRegistra();
   else if(act==='presenze'){ const x = st.contenuti.find(c => c.id===id); if(x) openPresenze({chiave:x.id, titolo:x.titolo, sezione:x.sezione, minuti:minuti(x.durata) ? Math.round(minuti(x.durata)) : 60, at:x.quando, fisso:true}); }
+  else if(act==='or-edit'){ st.orEdit = id; render(true); const f = $('#or-f'); if(f) f.scrollIntoView({behavior:'smooth', block:'center'}); }
+  else if(act==='or-annulla'){ st.orEdit = null; render(true); }
+  else if(act==='or-del'){
+    const key = 'or/'+id;
+    if(st.armed!==key){ st.armed=key; render(true); clearTimeout(st._arm); st._arm=setTimeout(() => { if(st.armed===key){ st.armed=null; render(); } },4000); return; }
+    st.armed = null; const r = await st.sb.from('orario').delete().eq('id', id);
+    if(r.error) toast('Non è stato possibile toglierla. Riprova.'); else { toast('Tolta dall\'orario'); await loadData(); }
+  }
   else if(act==='presenze-sala'){ const g = id ? st.presenze.find(r => r.chiave===id) : null;
     openPresenze(g ? {chiave:g.chiave, titolo:g.titolo, sezione:g.sezione, minuti:g.minuti, at:g.at} : {sezione:'yoga', minuti:60}); }
   else if(act==='mail-sett'){ const on = b.checked; const r = await st.sb.rpc('imposta_mail_settimanale', {attiva:on});
@@ -1534,8 +1570,15 @@ function addAp(a){
   const n = ++apN, row = document.createElement('div'); row.className = 'ap-row';
   row.innerHTML = `<input class="inp ap-t" id="ap-t-${n}" aria-label="Titolo approfondimento" placeholder="Muladhara, il chakra della radice" value="${esc(a.titolo||'')}">
     <textarea class="inp ta ap-x" id="ap-x-${n}" aria-label="Testo approfondimento" rows="4" placeholder="Testo dell'approfondimento">${esc(a.testo||'')}</textarea>
-    <button type="button" class="btn danger">Togli</button>`;
-  row.querySelector('button').addEventListener('click', () => row.remove());
+    <div class="ap-file"><span class="ap-cur">${a.immagine && st.urls[a.immagine] ? `<img class="ap-prev" src="${esc(st.urls[a.immagine])}" alt="">` : ''}</span>
+      <label class="btn" for="ap-i-${n}">${a.immagine ? 'Cambia immagine' : '+ Immagine'}</label><input type="file" id="ap-i-${n}" accept="image/*" hidden>
+      ${a.immagine ? '<button type="button" class="btn ap-noimg">Togli immagine</button>' : ''}</div>
+    <button type="button" class="btn danger ap-del">Togli approfondimento</button>`;
+  row.dataset.immagine = a.immagine || '';
+  row.querySelector('.ap-del').addEventListener('click', () => row.remove());
+  row.querySelector('input[type=file]').addEventListener('change', e => { const f = e.target.files[0]; if(!f) return;
+    row._file = f; row.querySelector('.ap-cur').innerHTML = `<img class="ap-prev" src="${URL.createObjectURL(f)}" alt="">`; });
+  const no = row.querySelector('.ap-noimg'); if(no) no.addEventListener('click', () => { row.dataset.immagine = ''; row._file = null; row.querySelector('.ap-cur').innerHTML = '<small>Immagine tolta</small>'; no.remove(); });
   $('#ap-list').appendChild(row);
 }
 function uploadType(f){
@@ -1555,6 +1598,16 @@ function checkFile(){
   if(f.size > 50*1024*1024){ err.textContent = `Il file pesa ${(f.size/1048576).toFixed(0)} MB, il massimo è 50 MB. Per le registrazioni lunghe incolla il link di Drive.`; err.hidden = false; return false; }
   return true;
 }
+// Le foto del telefono sono grandi: le riduce a 1600 px (JPEG) prima di caricarle.
+async function riduciImmagine(f, max = 1600){
+  try{
+    const bmp = await createImageBitmap(f), k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width*k); c.height = Math.round(bmp.height*k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const b = await new Promise(r => c.toBlob(r, 'image/jpeg', .85));
+    return b || f;
+  }catch(_){ return f; }
+}
 async function save(){
   const s = st.sheet, err = $('#f-err'); err.hidden = true;
   const tipo = $('#f-tipo').value, titolo = $('#f-titolo').value.trim();
@@ -1566,7 +1619,7 @@ async function save(){
   const data = {sezione:$('#f-sez').value, mese, titolo, esempio:false, aggiornato:new Date().toISOString()};
   if(tipo==='tema'){
     data.sottotitolo = $('#f-sotto').value.trim(); data.testo = $('#f-testo').value.trim();
-    data.approfondimenti = [...document.querySelectorAll('.ap-row')].map(r => ({titolo:r.querySelector('.ap-t').value.trim(), testo:r.querySelector('.ap-x').value.trim()})).filter(a => a.titolo||a.testo);
+    data.approfondimenti = [...document.querySelectorAll('.ap-row')].map(r => ({titolo:r.querySelector('.ap-t').value.trim(), testo:r.querySelector('.ap-x').value.trim(), immagine:r.dataset.immagine || null, _row:r})).filter(a => a.titolo||a.testo||a._row._file||a.immagine);
   } else {
     data.tipo = tipo; data.descrizione = $('#f-desc').value.trim();
     if(tipo==='articolo') data.testo = $('#f-testo').value.trim();
@@ -1585,8 +1638,19 @@ async function save(){
       data.file = (s.x.file && !s.removeAsset && !s.file) ? s.x.file : null;
     }
   }
-  const btn = $('#f-save'); btn.disabled = true; let newFile = null;
+  const btn = $('#f-save'); btn.disabled = true; let newFile = null; const nuoveImg = [];
   try{
+    if(tipo==='tema'){
+      for(const a of data.approfondimenti){
+        const f = a._row._file; delete a._row;
+        if(f){ btn.textContent = 'Caricamento dell\'immagine…';
+          const img = await riduciImmagine(f), path = 'temi/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.jpg';
+          const up = await st.sb.storage.from('media').upload(path, img, {contentType:img.type || 'image/jpeg', upsert:false});
+          if(up.error) throw {code:'upload', message:up.error.message};
+          nuoveImg.push(path); a.immagine = path; }
+        if(!a.immagine) delete a.immagine;
+      }
+    }
     if(s.file){
       btn.textContent = 'Caricamento del file…';
       const path = Date.now() + '-' + (s.file.name||'file').toLowerCase().replace(/[^a-z0-9.]+/g,'-').slice(-60);
@@ -1599,6 +1663,9 @@ async function save(){
     const r = s.editing ? await st.sb.from(col).update(data).eq('id', s.x.id) : await st.sb.from(col).insert(data);
     if(r.error) throw {code:'db', message:r.error.message};
     if(s.x.file && s.x.file !== data.file) await st.sb.storage.from('media').remove([s.x.file]);
+    if(tipo==='tema'){ const usate = new Set(data.approfondimenti.map(a => a.immagine).filter(Boolean));
+      const vecchie = (s.x.approfondimenti||[]).map(a => a.immagine).filter(p => p && !usate.has(p));
+      if(vecchie.length) await st.sb.storage.from('media').remove(vecchie); }
     closeSheet(); toast('Salvato');
     if(data.mese !== st.mese) st.mese = data.mese;
     await loadData();
@@ -1607,7 +1674,8 @@ async function save(){
     if(e && e.code==='upload') fail('Il file non si è caricato (' + (e.message||'errore') + '). Per le registrazioni lunghe incolla il link di Drive.');
     else if(e && e.code==='db') fail('Salvataggio non riuscito: ' + (e.message||'errore') + '.');
     else fail('Salvataggio non riuscito. Controlla la connessione e riprova.');
-    if(newFile){ try{ await st.sb.storage.from('media').remove([newFile]); }catch(_){} }
+    const togli = [newFile, ...nuoveImg].filter(Boolean);
+    if(togli.length){ try{ await st.sb.storage.from('media').remove(togli); }catch(_){} }
   }
 }
 
@@ -1625,7 +1693,7 @@ function normTel(t){
 const soloCifre = t => String(t||'').replace(/\D/g, '');
 
 function viewSetup(){
-  return hero('alba', `<span class="eyebrow">Bindu</span><h1>Quasi pronta</h1>
+  return hero('alba', `<span class="eyebrow">Mandala</span><h1>Quasi pronta</h1>
     <p class="sub">Il sito non è ancora collegato al database. Apri il file config.js e inserisci l'indirizzo e la chiave del progetto Supabase, come spiega la guida.</p>`);
 }
 function viewLogin(){
@@ -1659,8 +1727,8 @@ function viewLogin(){
       <p class="login-signature">Yoga, posturale e mindfulness con Tiziana</p></div>`;
 }
 function viewNonInvitata(){
-  return hero('tramonto', `<span class="eyebrow">Bindu</span><h1>Non sei ancora nell'elenco</h1>
-    <p class="sub">Hai fatto l'accesso come ${esc(st.chi)}, ma non risulti tra le allieve di Bindu. Chiedi alla tua insegnante di aggiungerti, poi ricarica la pagina.</p>
+  return hero('tramonto', `<span class="eyebrow">Mandala</span><h1>Non sei ancora nell'elenco</h1>
+    <p class="sub">Hai fatto l'accesso come ${esc(st.chi)}, ma non risulti tra le allieve di Mandala. Chiedi alla tua insegnante di aggiungerti, poi ricarica la pagina.</p>
     <div class="m-btns"><button class="btn" data-act="reload">Ricarica</button><button class="btn" data-act="logout">Esci</button></div>`, 'short');
 }
 function viewAccount(){
@@ -1671,7 +1739,7 @@ function viewAccount(){
       <button class="btn danger ${armed?'armed':''}" data-act="al-del" data-id="${esc(a.id)}">${armed?'Conferma':'Togli'}</button></li>`;
   }).join('');
   const lista = admin ? `<section class="card al-card"><div class="group-head"><h2>Allieve</h2><span class="muted">${st.allieve.length} nell'elenco</span></div>
-    <p class="muted">Solo chi è in questo elenco può entrare in Bindu. Dopo averla aggiunta, di' all'allieva di aprire il sito e chiedere il codice con la sua email${TEL ? ' o il suo numero' : ''}.</p>
+    <p class="muted">Solo chi è in questo elenco può entrare in Mandala. Dopo averla aggiunta, di' all'allieva di aprire il sito e chiedere il codice con la sua email${TEL ? ' o il suo numero' : ''}.</p>
     <form id="al-f" class="al-f" novalidate>
       <input class="inp" id="al-nome" placeholder="Nome" aria-label="Nome dell'allieva">
       <input class="inp" id="al-email" type="email" inputmode="email" placeholder="Email" aria-label="Email dell'allieva">
@@ -1680,6 +1748,21 @@ function viewAccount(){
     <ul class="al-list">${righe || '<li class="muted">Nessuna allieva ancora.</li>'}</ul></section>` : '';
   const gruppi = {}; st.presenze.forEach(r => { (gruppi[r.chiave] = gruppi[r.chiave] || Object.assign({n:0}, r)).n++; });
   const sale = Object.values(gruppi).filter(g => !st.contenuti.some(c => c.id===g.chiave)).sort((a,b) => String(b.at).localeCompare(String(a.at))).slice(0,8);
+  const oe = st.orario.find(o => o.id===st.orEdit) || {};
+  const orario = admin ? `<section class="card al-card"><div class="group-head"><h2>Orario delle lezioni dal vivo</h2></div>
+    <p class="muted">Lezioni che si ripetono ogni settimana, da ottobre a giugno. Compaiono da sole tra le lezioni dal vivo, con «Ero presente» e «Segna le presenze». Metti qui il link Zoom.</p>
+    <ul class="al-list">${st.orario.map(o => { const armed = st.armed==='or/'+o.id;
+      return `<li><span><b>${esc(GIORNI[o.giorno]||'')} · ${esc(o.inizio)}–${esc(o.fine)}</b><small>${esc(o.titolo)} · ${esc(NOME_SEZ[o.sezione]||'')}${o.dove ? ' · link Zoom ✓' : ' · manca il link Zoom'}</small></span>
+        <span class="m-btns"><button class="btn" data-act="or-edit" data-id="${esc(o.id)}">Modifica</button><button class="btn danger ${armed?'armed':''}" data-act="or-del" data-id="${esc(o.id)}">${armed?'Conferma':'Togli'}</button></span></li>`; }).join('') || '<li class="muted">Nessuna lezione in orario.</li>'}</ul>
+    <form id="or-f" class="or-f" novalidate><h3>${st.orEdit ? 'Modifica la lezione' : 'Aggiungi una lezione all\'orario'}</h3>
+      <div class="row2"><div class="field"><label for="or-g">Giorno</label><select id="or-g">${GIORNI.slice(1).map((g,i) => `<option value="${i+1}" ${Number(oe.giorno)===i+1?'selected':''}>${g}</option>`).join('')}</select></div>
+        <div class="field"><label for="or-s">Sezione</label><select id="or-s">${Object.entries(SEZ).map(([k,v]) => `<option value="${k}" ${oe.sezione===k?'selected':''}>${v.nome}</option>`).join('')}</select></div></div>
+      <div class="row2"><div class="field"><label for="or-i">Inizio</label><input type="time" id="or-i" value="${esc(oe.inizio||'19:00')}"></div>
+        <div class="field"><label for="or-e">Fine</label><input type="time" id="or-e" value="${esc(oe.fine||'20:00')}"></div></div>
+      <div class="field"><label for="or-t">Titolo</label><input id="or-t" maxlength="80" value="${esc(oe.titolo||'')}" placeholder="Lezione di yoga"></div>
+      <div class="field"><label for="or-d">Link Zoom</label><input id="or-d" inputmode="url" value="${esc(oe.dove||'')}" placeholder="https://zoom.us/j/…"></div>
+      <p class="form-err" id="or-err" hidden></p>
+      <div class="m-btns"><button class="btn primary" type="submit">${st.orEdit ? 'Salva' : 'Aggiungi'}</button>${st.orEdit ? '<button class="btn" type="button" data-act="or-annulla">Annulla</button>' : ''}</div></form></section>` : '';
   const presenze = admin ? `<section class="card al-card"><div class="group-head"><h2>Presenze</h2></div>
     <p class="muted">Per le lezioni dal vivo in calendario usa «Segna le presenze» sulla lezione. Qui puoi segnare quelle in sala o fuori calendario: ogni allieva presente riceve un anello nel suo mandala.</p>
     <div class="m-btns"><button class="btn primary" data-act="presenze-sala">Segna le presenze di una lezione</button></div>
@@ -1687,9 +1770,9 @@ function viewAccount(){
       <button class="btn" data-act="presenze-sala" data-id="${esc(g.chiave)}">Modifica</button></li>`).join('')}</ul>` : ''}</section>` : '';
   const mailPref = !admin && st.mailSett !== null ? `<section class="card al-card"><h2>La mail della domenica</h2>
     <label class="mail-pref"><input type="checkbox" data-act="mail-sett" ${st.mailSett?'checked':''}><span>Ogni domenica ricevo una mail da Tiziana su come sta crescendo il mio mandala.<br><small class="muted">Puoi cambiare idea quando vuoi.</small></span></label></section>` : '';
-  return hero('tramonto', `<span class="eyebrow">${admin ? 'Insegnante' : 'Il tuo profilo'}</span><h1>${admin ? 'Gestisci Bindu' : 'Il tuo spazio'}</h1>
+  return hero('tramonto', `<span class="eyebrow">${admin ? 'Insegnante' : 'Il tuo profilo'}</span><h1>${admin ? 'Gestisci Mandala' : 'Il tuo spazio'}</h1>
       <p class="sub">Hai fatto l'accesso come ${esc(st.chi)}.</p><div class="m-btns"><button class="btn" data-act="logout">Esci</button></div>`, 'short')
-    + `<div class="wrap stack lift">${lista}${presenze}${admin ? '' : mandalaCard() + mailPref}</div>`;
+    + `<div class="wrap stack lift">${lista}${orario}${presenze}${admin ? '' : mandalaCard() + mailPref}</div>`;
 }
 
 async function inviaCodice(canale, dest, ancora){
@@ -1713,24 +1796,26 @@ async function inviaCodice(canale, dest, ancora){
 async function loadData(){
   if(!st.sb || !st.session || !st.member) return;
   st.lastLoad = Date.now();
-  const [t, c, p, lz, pr] = await Promise.all([
+  const [t, c, p, lz, pr, orr] = await Promise.all([
     st.sb.from('temi').select('*'),
     st.sb.from('contenuti').select('*'),
     st.sb.from('pratiche').select('*'),
     st.sb.from('lezioni').select('drive_id,sezione,titolo,link,durata,mese,anno,caricata'),
-    st.sb.from('presenze').select('id,allieva_id,chiave,titolo,sezione,minuti,at,mese')
+    st.sb.from('presenze').select('id,allieva_id,chiave,titolo,sezione,minuti,at,mese'),
+    st.sb.from('orario').select('*').order('giorno').order('inizio')
   ]);
   if(t.error || c.error){ st.offline = true; st.loading = false; render(); return; }
   st.offline = false;
   st.temi = (t.data||[]).map(x => Object.assign({}, x, {approfondimenti: Array.isArray(x.approfondimenti) ? x.approfondimenti : []}));
-  st.contenuti = c.data || [];
+  if(!orr.error) st.orario = orr.data || [];
+  st.contenuti = (c.data || []).concat(lezioniOrario());
   if(!lz.error) st.lezioni = (lz.data||[]).map(LZ);
   if(!p.error){ const d = {}; (p.data||[]).forEach(r => d[r.chiave] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:r.tipo??null, nota:r.nota??null});
     // le presenze segnate da Tiziana entrano nel mandala dell'allieva (senza doppioni con "Ero presente")
     if(!st.canEdit && !pr.error) (pr.data||[]).forEach(r => { if(!d[r.chiave]) d['pres-'+r.id] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:'presenza', insegnante:true, ref:r.chiave}; });
     st.done = d; saveLocal(); }
   st.presenze = st.canEdit && !pr.error ? (pr.data||[]) : [];
-  const paths = [...new Set(st.contenuti.map(x => x.file).filter(Boolean))];
+  const paths = [...new Set(st.contenuti.map(x => x.file).concat(st.temi.flatMap(t => (t.approfondimenti||[]).map(a => a.immagine))).filter(Boolean))];
   if(paths.length){
     const sg = await st.sb.storage.from('media').createSignedUrls(paths, 6*3600);
     if(!sg.error) (sg.data||[]).forEach(r => { const u = r.signedUrl || r.signedURL; if(u && r.path) st.urls[r.path] = u; });
@@ -1775,6 +1860,17 @@ document.addEventListener('submit', async e => {
     if(r.error){ btn.disabled = false; btn.textContent = 'Entra'; err.textContent = 'Codice non valido o scaduto. Controlla le cifre oppure chiedine uno nuovo.'; err.hidden = false; return; }
     st.login = {step:'start', canale:L.canale, dest:''};
     onSession(r.data && r.data.session);
+  }
+  if(f.id==='or-f'){
+    e.preventDefault();
+    const err = $('#or-err'); err.hidden = true;
+    const d = {giorno:Number($('#or-g').value), sezione:$('#or-s').value, inizio:$('#or-i').value, fine:$('#or-e').value,
+      titolo:$('#or-t').value.trim() || ('Lezione di ' + NOME_SEZ[$('#or-s').value].toLowerCase()), dove:$('#or-d').value.trim() || null};
+    if(!/^\d{2}:\d{2}$/.test(d.inizio) || !/^\d{2}:\d{2}$/.test(d.fine) || d.fine <= d.inizio){ err.textContent = 'Controlla gli orari: la fine deve venire dopo l\'inizio.'; err.hidden = false; return; }
+    if(d.dove && !safeLink(d.dove)){ err.textContent = 'Il link deve iniziare con https://'; err.hidden = false; return; }
+    const r = st.orEdit ? await st.sb.from('orario').update(d).eq('id', st.orEdit) : await st.sb.from('orario').insert(d);
+    if(r.error){ err.textContent = 'Salvataggio non riuscito: ' + r.error.message; err.hidden = false; return; }
+    toast(st.orEdit ? 'Orario aggiornato' : 'Lezione aggiunta all\'orario'); st.orEdit = null; await loadData();
   }
   if(f.id==='al-f'){
     e.preventDefault();
