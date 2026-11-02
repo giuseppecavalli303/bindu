@@ -1756,9 +1756,9 @@ function viewLogin(){
   const dove = tel ? (TEL==='whatsapp' ? 'su WhatsApp' : 'via SMS') : 'via email';
   const body = L.step==='code'
     ? `<h2>Scrivi il codice</h2>
-       <p class="muted">${tel ? `Ti abbiamo mandato un codice di 6 cifre ${dove} a <b>${esc(L.dest)}</b>.` : `Ti abbiamo mandato un'email a <b>${esc(L.dest)}</b>. Se contiene un codice di 6 cifre, scrivilo qui sotto. Se contiene un pulsante o un link per entrare, aprilo da questo telefono o computer.`} Se non la trovi, guarda anche nello spam.</p>
+       <p class="muted">${tel ? `Ti abbiamo mandato un codice ${dove} a <b>${esc(L.dest)}</b>.` : `Ti abbiamo mandato un'email a <b>${esc(L.dest)}</b>. Se contiene un codice, scrivilo qui sotto. Se contiene un pulsante o un link per entrare, aprilo da questo telefono o computer.`} Se non la trovi, guarda anche nello spam.</p>
        <form id="code-f" class="login-f" novalidate><label for="code-inp">Codice di accesso</label>
-       <input class="inp code-inp" id="code-inp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="······">
+       <input class="inp code-inp" id="code-inp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="········">
        <button class="btn primary" type="submit" id="code-go">Entra</button></form>
        <p class="form-err" id="login-err" hidden></p>
        <p class="hint"><button class="linkish" type="button" data-act="login-again">Mandami un nuovo codice</button> · <button class="linkish" type="button" data-act="login-reset">${tel?'Cambia numero':'Cambia indirizzo'}</button></p>`
@@ -1905,7 +1905,7 @@ document.addEventListener('submit', async e => {
   if(f.id==='code-f'){
     e.preventDefault();
     const token = soloCifre($('#code-inp').value), err = $('#login-err'), btn = $('#code-go');
-    if(token.length < 6){ err.textContent = 'Il codice ha 6 cifre.'; err.hidden = false; return; }
+    if(token.length < 6){ err.textContent = 'Il codice è troppo corto: controlla di averlo scritto tutto.'; err.hidden = false; return; }
     btn.disabled = true; btn.textContent = 'Verifica…';
     const L = st.login;
     const r = L.canale==='telefono'

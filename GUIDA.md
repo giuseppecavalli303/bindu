@@ -37,7 +37,7 @@ Nel progetto apri **SQL Editor** (nella barra a sinistra) e premi **New query**.
 
 ## 4. Il codice di accesso via email
 
-Bindu non usa password: a chi entra arriva un codice di 6 cifre.
+Bindu non usa password: a chi entra arriva un codice monouso.
 
 1. **Authentication → Sign In / Providers → Email**: controlla che sia attivo. Lunghezza del codice (Email OTP Length): **6**.
 2. **Authentication → Emails → Templates**: modifica i due modelli **Magic Link** e **Confirm signup** in questo modo.
