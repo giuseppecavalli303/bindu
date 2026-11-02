@@ -1,5 +1,5 @@
 -- =====================================================================
--- Bindu · orario settimanale delle lezioni dal vivo
+-- Mandala · orario settimanale delle lezioni dal vivo
 -- Ogni riga è una lezione che si ripete ogni settimana (da ottobre a giugno).
 -- L'app ne ricava le date delle prossime lezioni, con "Ero presente" e le presenze.
 -- Si può rieseguire senza danni.
