@@ -189,7 +189,7 @@ function supabase(chiave, metodo, percorso, corpo, extra) {
  * La mail della domenica: a ogni allieva, come sta crescendo il suo mandala
  * ===================================================================== */
 
-const SITO = 'https://giuseppecavalli303.github.io/bindu/';
+const SITO = 'https://mandala.yogacontiziana.it/';
 const INSEGNANTE = 'yogacontiziana@gmail.com';
 const TINTE = {
   yoga:        { nome: 'Yoga',        chiaro: '#F5C4D8', scuro: '#A8457A' },

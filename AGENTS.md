@@ -15,7 +15,8 @@
 
 | Cosa | Dove / come |
 |---|---|
-| Sito online | <https://giuseppecavalli303.github.io/bindu/> (GitHub Pages, branch `main`, cartella principale) |
+| Sito online | <https://mandala.yogacontiziana.it/> (GitHub Pages, branch `main`, cartella principale, file `CNAME`). Il vecchio indirizzo giuseppecavalli303.github.io/bindu porta qui da solo |
+| Dominio | `yogacontiziana.it` su OVH (DNS `dns103`/`ns103.ovh.net`): `mandala` CNAME → `giuseppecavalli303.github.io.`; posta MX Plan OVH con la casella `tiziana@yogacontiziana.it`; record Brevo: `brevo-code` (TXT), `brevo1/2._domainkey` (CNAME), `_dmarc` (TXT `p=none`); SPF di OVH già presente |
 | Codice | <https://github.com/giuseppecavalli303/bindu> |
 | Database | Supabase, progetto `bindu` (ref `muakbnnfscwciogulmqt`, regione Paris), organizzazione **Bindu** sul piano Free. Va tenuto **separato** dal progetto Distanti Book Club |
 | Struttura dati | `supabase/01-struttura.sql`, `02-insegnante.sql` e `03-esempi.sql` sono già stati eseguiti |
