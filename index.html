@@ -134,6 +134,7 @@ p{margin:0} a{color:inherit} button,input,select,textarea{font:inherit;color:inh
 .hint{font-size:.82rem;color:var(--muted)}
 @media (max-width:640px){ .mandala{grid-template-columns:1fr;text-align:center;padding:20px} .m-txt{align-items:center} .legend{justify-content:center} }
 
+.frase-soffio{font-family:var(--display);font-size:1.25rem;line-height:1.35}
 .rito{display:flex;flex-direction:column;gap:10px;align-items:inherit;padding:14px 16px;border-radius:18px;background:color-mix(in srgb, var(--peach) 34%, var(--surface));font-size:.95rem}
 
 /* Section cards */
@@ -833,13 +834,14 @@ function drawMandala(cv, still, pratiche){
 }
 
 /* ---------- il rito: dissolvere il mandala ---------- */
+const FRASE_SOFFIO = 'La forma si dissolve, ma l\'energia della tua pratica resta dentro di te.';
 function mesePrima(m){ const [y,mo] = m.split('-').map(Number); const d = new Date(y, mo-2, 1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
 function dataBreve(at){ try{ return 'il ' + new Intl.DateTimeFormat('it-IT',{day:'numeric',month:'long'}).format(new Date(at)); }catch(_){ return ''; } }
 function chiudiRito(m){
   const key = 'sciolto-'+m;
   st.done[key] = {at:new Date().toISOString(), mese:m, sciolto:true, sezione:null, titolo:'Mandala dissolto'};
   persist(key, true); st.dissolving = false; render(true);
-  toast('Il mandala è tornato sabbia');
+  toast(FRASE_SOFFIO);
 }
 function dissolvi(m){
   const cv = document.getElementById('mandala');
@@ -970,21 +972,25 @@ function mandalaCard(){
   const [yy, mm] = st.mese.split('-').map(Number), ultimo = new Date(yy, mm, 0).getDate();
   const fineMese = st.mese < MESE_OGGI || (st.mese===MESE_OGGI && new Date().getDate() >= ultimo-2);
   const armedS = st.armed==='sciogli';
-  const rito = sc ? `<p class="hint">Hai lasciato andare questo mandala ${dataBreve(sc.at)}.</p>`
-    : (n && fineMese) ? `<div class="rito"><p>Il mese si chiude. Come i monaci con la sabbia, puoi lasciare andare il tuo mandala e ricominciare dal bindu.</p>
-        <button class="btn ${armedS?'primary':''}" data-act="sciogli">${armedS ? 'Tocca di nuovo per lasciarlo andare' : 'Dissolvi il mandala'}</button></div>`
-    : n ? `<p class="hint">Negli ultimi giorni del mese potrai dissolverlo e lasciarlo andare.</p>` : '';
+  const condiviso = st.cerchio.some(v => v.tipo==='mandala' && v.autore===(st.session && st.session.user && st.session.user.id) && v.dati && v.dati.mese===st.mese);
+  const rito = sc ? `<div class="rito"><p class="frase-soffio">${FRASE_SOFFIO}</p><p class="hint">Hai soffiato sul mandala di ${esc(meseNome(st.mese))} ${dataBreve(sc.at)}.</p></div>`
+    : (n && fineMese) ? `<div class="rito"><p><b>Il mese si chiude.</b> I monaci tibetani creano mandala di sabbia con giorni di cura e poi li soffiano via: per ricordare che tutto cambia e che conta la presenza messa nel crearli, non la forma che resta.</p>
+        <p>Il tuo mandala ti chiede una scelta: lasciarlo andare con un soffio, oppure affidarlo al Cerchio perché resti come traccia per le compagne.</p>
+        <div class="m-btns"><button class="btn ${armedS?'primary':''}" data-act="sciogli">${armedS ? 'Tocca di nuovo per soffiare' : '🌬️ Soffia sul mandala'}</button>
+        ${condiviso ? '<span class="hint">✓ Condiviso nel Cerchio</span>' : '<button class="btn" data-act="cz-mandala">Condividi nel Cerchio</button>'}</div>
+        <p class="hint">In ogni caso, il mese nuovo comincia con un mandala nuovo, dal bindu.</p></div>`
+    : n ? `<p class="hint">Negli ultimi giorni del mese potrai scegliere: soffiare sul mandala o condividerlo nel Cerchio.</p>` : '';
   const prev = mesePrima(MESE_OGGI);
   const attesa = (st.mese===MESE_OGGI && new Date().getDate() <= 3 && !st.done['sciolto-'+prev] && Object.entries(st.done).some(([k,v]) => v && v.mese===prev && !v.sciolto && !k.startsWith('sciolto-')))
-    ? `<p class="hint">Il mandala di ${esc(meseNome(prev))} aspetta ancora di essere lasciato andare. <button class="linkish" type="button" data-act="vai-mese" data-id="${prev}">Vai a ${esc(meseNome(prev))}</button></p>` : '';
+    ? `<p class="hint">Il mandala di ${esc(meseNome(prev))} aspetta la tua scelta: soffiarci sopra o condividerlo nel Cerchio. <button class="linkish" type="button" data-act="vai-mese" data-id="${prev}">Vai a ${esc(meseNome(prev))}</button></p>` : '';
   const titolo = sc ? 'Tornato sabbia' : n===0 ? 'Sta per nascere' : n===1 ? 'Una pratica' : n+' pratiche';
-  const testo = sc ? 'Questo mandala è stato dissolto. Ogni mese ne nasce uno nuovo, a partire dal bindu.' : n===0 ? 'Al centro c\'è il bindu, il punto da cui tutto nasce. Guarda una lezione, ascolta una meditazione oppure registra una camminata o una pratica fatta per conto tuo: nascerà il primo anello.'
+  const testo = sc ? 'Ogni mese ne nasce uno nuovo, a partire dal bindu.' : n===0 ? 'Al centro c\'è il bindu, il punto da cui tutto nasce. Guarda una lezione, ascolta una meditazione oppure registra una camminata o una pratica fatta per conto tuo: nascerà il primo anello.'
     : 'Ogni pratica aggiunge un anello intorno al bindu: il colore racconta cosa hai fatto, lo spessore quanto è durata.';
   return `<section class="card mandala"><div class="m-cv"><canvas id="mandala" role="img" aria-label="Il tuo mandala di ${esc(meseNome(st.mese))}: ${n} ${n===1?'pratica':'pratiche'}"></canvas></div>
     <div class="m-txt"><span class="eyebrow">Il tuo mandala di ${esc(meseNome(st.mese))}</span><h2>${titolo}</h2><p class="muted">${testo}</p>
     <ul class="legend">${Object.entries(NOME_SEZ).map(([k,nm]) => `<li class="${COLORE[k]}"><span class="sw"></span>${nm}<b>${c[k]||0}</b></li>`).join('')}</ul>
     ${rito}${attesa}${cal.html}<p class="hint">${cal.giorni} ${cal.giorni===1?'giorno':'giorni'} di pratica${cal.serie>1 ? ` · ${cal.serie} giorni di fila` : ''}</p>
-    ${st.mese===MESE_OGGI && !sc ? `<div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">${esc(PZ().titolo)} · ${esc(durataPausa(true))}</button></div>` : ''}${n && !sc ? `<p class="hint"><button class="linkish" type="button" data-act="cz-mandala">Condividi il tuo mandala nel Cerchio</button></p>` : ''}${diario(P)}${localNote}</div></section>`;
+    ${st.mese===MESE_OGGI && !sc ? `<div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">${esc(PZ().titolo)} · ${esc(durataPausa(true))}</button></div>` : ''}${n && !sc && !fineMese ? `<p class="hint"><button class="linkish" type="button" data-act="cz-mandala">Condividi il tuo mandala nel Cerchio</button></p>` : ''}${diario(P)}${localNote}</div></section>`;
 }
 
 function invito(){
