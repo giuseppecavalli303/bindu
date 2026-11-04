@@ -416,6 +416,26 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 .al-list .btn{white-space:nowrap}
 @media (max-width:480px){ .al-list li{flex-wrap:wrap} .al-list li > span:first-child{flex:1 1 100%} }
 .ap-img{display:block;width:100%;max-height:420px;object-fit:cover;border-radius:14px;margin:0 0 12px}
+/* Blog: immagini negli articoli e commenti */
+.art-cover{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--soft, var(--lilac))}
+.art-fig{margin:6px 0;display:flex;flex-direction:column;gap:6px}
+.art-fig img{display:block;width:100%;max-height:520px;object-fit:cover;border-radius:16px;background:var(--soft, var(--lilac))}
+.art-fig figcaption{font-size:.85rem;color:var(--muted)}
+.commenti{padding:24px 28px;display:flex;flex-direction:column;gap:14px}
+.commenti h2{font-size:1.3rem}
+.comm{display:flex;gap:12px;align-items:flex-start}
+.comm .av{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:.9rem;background:var(--soft, var(--lilac));color:var(--on-soft)}
+.comm.ins .av{background:var(--sez, var(--lilac-ink));color:var(--surface)}
+.comm .bolla{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 14px}
+.comm .chi{font-size:.85rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.comm .chi b{color:var(--ink);font-weight:600}
+.comm .txt{margin-top:4px;overflow-wrap:anywhere}
+.comm .txt p+p{margin-top:.5em}
+.comm .btn{margin-top:8px;padding:3px 10px;font-size:.78rem}
+.comm-f{display:flex;flex-direction:column;gap:8px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.comm-f textarea{min-height:84px}
+.comm-f .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
 .ap-row .ap-prev{max-width:160px;border-radius:10px;display:block}
 .ap-file{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
 .mail-pref{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
@@ -586,7 +606,7 @@ const LS = 'pdm-pratica-v1';
 const st = {temi:[], contenuti:[], lezioni:[], orario:[], orEdit:null, presenze:[], mailSett:null, mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
   loading:true, offline:false, armed:null, done:{}, uid:null, pRef:null, pLoaded:false, localOnly:false,
   pQueue:Promise.resolve(), dirty:false, tmin:10, scene:'alba',
-  sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[],
+  sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[], commenti:{}, bozze:{},
   login:{step:'start', canale:'email', dest:''}, lastLoad:0};
 try{ const v = JSON.parse(localStorage.getItem(LS)||'{}'); if(v && typeof v==='object') st.done = v; }catch(_){}
 
@@ -816,6 +836,7 @@ function dissolvi(m){
 /* ---------- routing ---------- */
 function readHash(){ let h = ''; try{ h = decodeURIComponent((location.hash||'').slice(1)); }catch(_){}
   st.route = (!h || /access_token|refresh_token|error_description|type=/.test(h)) ? 'home' : h; }
+document.addEventListener('input', e => { const f = e.target.closest && e.target.closest('#comm-f'); if(f) st.bozze[f.dataset.id] = e.target.value; });
 window.addEventListener('hashchange', () => { readHash(); st.dirty=false; render(true); window.scrollTo(0,0); });
 
 /* ---------- chrome ---------- */
@@ -875,9 +896,10 @@ function audioCard(x){
 }
 function articleCard(x, showSez){
   const s = SEZ[x.sezione] || SEZ.yoga;
-  return `<article class="card item ${s.cls}"><div class="body"><div class="meta">${showSez?`<span class="chip">${esc(s.nome)}</span>`:''}${badge(x)}</div>
+  const cop = imgArt(x)[0], u = cop && st.urls[cop.immagine], nc = (st.commenti[x.id]||[]).length;
+  return `<article class="card item ${s.cls}">${u ? `<a href="#a-${esc(x.id)}" tabindex="-1" aria-hidden="true"><img class="art-cover" src="${esc(u)}" alt="" loading="lazy"></a>` : ''}<div class="body"><div class="meta">${showSez?`<span class="chip">${esc(s.nome)}</span>`:''}${badge(x)}</div>
     <h3>${esc(x.titolo)}</h3>${x.descrizione?`<p class="desc">${esc(x.descrizione)}</p>`:''}
-    <div class="foot"><a class="read" href="#a-${esc(x.id)}">Leggi l'articolo →</a></div>${tools('contenuti',x)}</div></article>`;
+    <div class="foot"><a class="read" href="#a-${esc(x.id)}">Leggi l'articolo →</a>${nc ? `<span class="hint">${nc} ${nc===1?'commento':'commenti'}</span>` : ''}</div>${tools('contenuti',x)}</div></article>`;
 }
 function lezAnno(k, senzaMese){
   const items = lezDi(k).filter(l => !senzaMese || l.mese!==senzaMese), cartella = k==='yoga' ? 'Lezioni di Yoga online' : 'Lezioni di Posturale online';
@@ -1075,9 +1097,55 @@ function viewArticolo(id){
   const s = SEZ[x.sezione] || SEZ.yoga, tema = temiDi(x.sezione, x.mese)[0];
   return hero(s.scena, `<a class="back" href="#${esc(x.sezione)}">← ${esc(s.nome)}</a><span class="eyebrow">${esc(s.nome)} · ${esc(meseLabel(x.mese))}</span><h1>${esc(x.titolo)}</h1>`, 'short')
     + `<div class="wrap stack lift ${s.cls}"><article class="card article-card">${badge(x) ? `<div>${badge(x)}</div>` : ''}
-      ${x.descrizione ? `<p class="lead">${esc(x.descrizione)}</p>` : ''}<div class="prose">${paras(x.testo)}</div>
+      ${x.descrizione ? `<p class="lead">${esc(x.descrizione)}</p>` : ''}<div class="prose">${proseConImmagini(x)}</div>
       ${tema ? `<div class="notice">Fa parte del tema del mese: <a href="#${esc(x.sezione)}"><b>${esc(tema.titolo)}</b></a></div>` : ''}
-      ${tools('contenuti',x)}</article></div>`;
+      ${tools('contenuti',x)}</article>${viewCommenti(x)}</div>`;
+}
+// Immagini dell'articolo (con link firmato già pronto).
+const imgArt = x => (Array.isArray(x.immagini) ? x.immagini : []).filter(i => i && i.immagine);
+// La prima immagine apre l'articolo; le altre si distribuiscono tra i paragrafi.
+function proseConImmagini(x){
+  const fig = i => st.urls[i.immagine] ? `<figure class="art-fig"><img src="${esc(st.urls[i.immagine])}" alt="${esc(i.didascalia||'')}" loading="lazy">${i.didascalia ? `<figcaption>${esc(i.didascalia)}</figcaption>` : ''}</figure>` : '';
+  const imgs = imgArt(x), ps = String(x.testo||'').trim().split(/\n\s*\n/).filter(Boolean);
+  if(!imgs.length) return paras(x.testo);
+  const [prima, ...altre] = imgs, out = [fig(prima)], dopo = {};
+  altre.forEach((im, i) => { const k = Math.max(1, Math.round((i+1) * ps.length / (altre.length+1))); (dopo[k] = dopo[k] || []).push(im); });
+  ps.forEach((p, i) => { out.push(paras(p)); (dopo[i+1]||[]).forEach(im => out.push(fig(im))); });
+  if(!ps.length) altre.forEach(im => out.push(fig(im)));
+  return out.join('');
+}
+const iniziale = n => (String(n||'?').trim()[0] || '?').toUpperCase();
+function quandoComm(t){
+  const d = new Date(t), oggi = new Date();
+  const g = d.toDateString()===oggi.toDateString() ? 'oggi' : d.toLocaleDateString('it-IT', {day:'numeric', month:'long'});
+  return g + ', ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+}
+function viewCommenti(x){
+  const lista = st.commenti[x.id];
+  if(!lista){ caricaCommenti(x.id); }
+  const io = st.session && st.session.user && st.session.user.id;
+  const righe = (lista||[]).map(c => { const armed = st.armed === 'comm/'+c.id, mio = c.autore === io;
+    return `<div class="comm ${c.insegnante?'ins':''}"><span class="av" aria-hidden="true">${esc(iniziale(c.nome))}</span><div class="bolla">
+      <div class="chi"><b>${esc(c.nome||'Un\'allieva')}</b>${c.insegnante?'<span>insegnante</span>':''}<span>${esc(quandoComm(c.creato))}</span></div>
+      <div class="txt">${paras(c.testo)}</div>
+      ${mio || st.canEdit ? `<button class="btn danger ${armed?'armed':''}" data-act="comm-del" data-id="${esc(c.id)}" data-art="${esc(x.id)}">${armed?'Conferma':'Elimina'}</button>` : ''}</div></div>`; }).join('');
+  const n = (lista||[]).length;
+  return `<section class="card commenti" aria-labelledby="comm-h-${esc(x.id)}"><h2 id="comm-h-${esc(x.id)}">${n ? `Commenti (${n})` : 'Commenti'}</h2>
+    ${!lista ? '<p class="hint">Caricamento dei commenti…</p>' : righe || '<p class="hint">Ancora nessun commento. Scrivi tu il primo: cosa ti ha lasciato questa lettura?</p>'}
+    <form class="comm-f" id="comm-f" data-id="${esc(x.id)}" novalidate>
+      <label for="comm-t" class="sr-only">Il tuo commento</label>
+      <textarea class="inp ta" id="comm-t" maxlength="2000" rows="3" placeholder="Scrivi un commento…">${esc(st.bozze[x.id]||'')}</textarea>
+      <div class="row"><span>${st.canEdit ? 'Firmerai come Tiziana.' : 'Lo vedono Tiziana e le altre allieve, con il tuo nome.'}</span><button type="submit" class="btn primary" id="comm-go">Pubblica</button></div>
+      <p class="form-err" id="comm-err" hidden></p>
+    </form></section>`;
+}
+async function caricaCommenti(id){
+  if(!st.sb || (caricaCommenti.in||{})[id]) return;
+  (caricaCommenti.in = caricaCommenti.in || {})[id] = true;
+  const r = await st.sb.from('commenti').select('id,contenuto_id,autore,nome,insegnante,testo,creato').eq('contenuto_id', id).order('creato');
+  caricaCommenti.in[id] = false;
+  st.commenti[id] = r.error ? [] : (r.data || []);
+  if(st.route === 'a-'+id) render();
 }
 function render(force){
   if(!force && (isPlaying() || st.dissolving)){ st.dirty = true; renderChrome(); return; }
@@ -1533,6 +1601,14 @@ document.addEventListener('click', async e => {
     if(a.paused) a.play().catch(() => toast('Questo audio non si riesce a riprodurre.')); else a.pause(); }
   else if(act==='seek'){ const a = document.getElementById('au-'+id); if(!a || !isFinite(a.duration)) return;
     const r = b.getBoundingClientRect(); a.currentTime = Math.min(1, Math.max(0, (e.clientX-r.left)/r.width)) * a.duration; updPlayer(a); }
+  else if(act==='comm-del'){
+    const key = 'comm/'+id, art = b.dataset.art;
+    if(st.armed!==key){ st.armed=key; render(true); clearTimeout(st._arm); st._arm=setTimeout(() => { if(st.armed===key){ st.armed=null; render(); } },4000); return; }
+    st.armed = null;
+    const r = await st.sb.from('commenti').delete().eq('id', id);
+    if(r.error) toast('Non riesco a eliminarlo. Riprova.');
+    else { st.commenti[art] = (st.commenti[art]||[]).filter(c => c.id!==id); toast('Commento eliminato'); render(true); }
+  }
   else if(act==='del'){
     const key = b.dataset.col+'/'+id;
     if(st.armed!==key){ st.armed=key; render(true); clearTimeout(st._arm); st._arm=setTimeout(() => { st.armed=null; render(); },4000); return; }
@@ -1540,7 +1616,8 @@ document.addEventListener('click', async e => {
     const list = b.dataset.col==='temi'?st.temi:st.contenuti, x = list.find(i => i.id===id);
     try{
       const r = await st.sb.from(b.dataset.col).delete().eq('id', id); if(r.error) throw r.error;
-      if(x && x.file) await st.sb.storage.from('media').remove([x.file]);
+      const via = [x && x.file, ...(x ? imgArt(x).map(i => i.immagine) : [])].filter(Boolean);
+      if(via.length) await st.sb.storage.from('media').remove(via);
       toast('Eliminato'); await loadData();
       if(st.route==='a-'+id) location.hash = x ? x.sezione : 'home';
     }catch(err){ toast('Eliminazione non riuscita. Riprova.'); }
@@ -1563,6 +1640,9 @@ function openSheet(x, editing){
     <div class="field" data-for="tema"><label for="f-sotto">Sottotitolo</label><input id="f-sotto" value="${esc(x.sottotitolo||'')}" placeholder="Una frase che riassume il tema"></div>
     <div class="field" data-for="video audio articolo diretta"><label for="f-desc">Descrizione breve</label><input id="f-desc" value="${esc(x.descrizione||'')}" placeholder="Cosa si trova in questo contenuto"></div>
     <div class="field" data-for="tema articolo"><label for="f-testo">Testo</label><textarea id="f-testo" rows="8" placeholder="Lascia una riga vuota per iniziare un nuovo paragrafo">${esc(x.testo||'')}</textarea></div>
+    <div class="field" data-for="articolo"><label>Immagini</label><span class="hint">La prima apre l'articolo e compare nell'elenco del blog; le altre si alternano ai paragrafi.</span>
+      <div id="img-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      <label class="btn" for="img-add" style="align-self:flex-start">+ Aggiungi immagini</label><input type="file" id="img-add" accept="image/*" multiple hidden></div>
     <div class="field" data-for="tema"><label>Approfondimenti</label><div id="ap-list" style="display:flex;flex-direction:column;gap:10px"></div>
       <button type="button" class="btn" id="ap-add" style="align-self:flex-start">+ Aggiungi approfondimento</button></div>
     <div class="field" data-for="tema" id="perc-box"><label>Il percorso del mese</label><span class="hint">Una breve descrizione per ogni settimana, con un'immagine se vuoi. Compare in Posturale e in Mindfulness.</span>
@@ -1589,6 +1669,8 @@ function openSheet(x, editing){
   </form></div>`;
   (x.approfondimenti||[]).filter(a => !a.settimana).forEach(a => addAp(a));
   [1,2,3,4].forEach(w => addAp((x.approfondimenti||[]).find(y => Number(y.settimana)===w) || {}, w));
+  imgArt(x).forEach(i => addImgArt(i));
+  $('#img-add').addEventListener('change', e => { [...e.target.files].forEach(f => addImgArt({}, f)); e.target.value = ''; });
   syncFields(); showCurrentFile();
   $('#f-tipo').addEventListener('change', syncFields); $('#f-sez').addEventListener('change', syncFields);
   $('#ap-add').addEventListener('click', () => addAp({}));
@@ -1631,6 +1713,17 @@ function addAp(a, settimana){
     row._file = f; row.querySelector('.ap-cur').innerHTML = `<img class="ap-prev" src="${URL.createObjectURL(f)}" alt="">`; });
   const no = row.querySelector('.ap-noimg'); if(no) no.addEventListener('click', () => { row.dataset.immagine = ''; row._file = null; row.querySelector('.ap-cur').innerHTML = '<small>Immagine tolta</small>'; no.remove(); });
   (settimana ? $('#perc-list') : $('#ap-list')).appendChild(row);
+}
+function addImgArt(i, file){
+  const n = ++apN, row = document.createElement('div'); row.className = 'ap-row img-row';
+  const src = file ? URL.createObjectURL(file) : st.urls[i.immagine];
+  row.innerHTML = `${src ? `<img class="ap-prev" src="${esc(src)}" alt="">` : '<small>Immagine</small>'}
+    <input class="inp img-d" id="img-d-${n}" aria-label="Didascalia" placeholder="Didascalia (facoltativa)" value="${esc(i.didascalia||'')}">
+    <div class="ap-file"><button type="button" class="btn img-su">↑ Prima</button><button type="button" class="btn danger img-del">Togli immagine</button></div>`;
+  row.dataset.immagine = i.immagine || ''; row._file = file || null;
+  row.querySelector('.img-del').addEventListener('click', () => row.remove());
+  row.querySelector('.img-su').addEventListener('click', () => { const p = row.previousElementSibling; if(p) row.parentNode.insertBefore(row, p); });
+  $('#img-list').appendChild(row);
 }
 function uploadType(f){
   const n = (f.name||'').toLowerCase(), t = f.type || '';
@@ -1676,7 +1769,8 @@ async function save(){
       .filter(a => a.titolo||a.testo||a._row._file||a.immagine);
   } else {
     data.tipo = tipo; data.descrizione = $('#f-desc').value.trim();
-    if(tipo==='articolo') data.testo = $('#f-testo').value.trim();
+    if(tipo==='articolo'){ data.testo = $('#f-testo').value.trim();
+      data.immagini = [...document.querySelectorAll('.img-row')].map(r => ({immagine:r.dataset.immagine || null, didascalia:r.querySelector('.img-d').value.trim(), _row:r})); }
     if(tipo==='diretta'){
       const q = $('#f-quando').value;
       if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(q)) return fail('Scegli data e ora della lezione.');
@@ -1705,6 +1799,18 @@ async function save(){
         if(!a.immagine) delete a.immagine;
       }
     }
+    if(tipo==='articolo'){
+      for(const a of data.immagini){
+        const f = a._row._file; delete a._row;
+        if(f){ btn.textContent = 'Caricamento delle immagini…';
+          const img = await riduciImmagine(f), path = 'articoli/' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.jpg';
+          const up = await st.sb.storage.from('media').upload(path, img, {contentType:img.type || 'image/jpeg', upsert:false});
+          if(up.error) throw {code:'upload', message:up.error.message};
+          nuoveImg.push(path); a.immagine = path; }
+        if(!a.didascalia) delete a.didascalia;
+      }
+      data.immagini = data.immagini.filter(a => a.immagine);
+    }
     if(s.file){
       btn.textContent = 'Caricamento del file…';
       const path = Date.now() + '-' + (s.file.name||'file').toLowerCase().replace(/[^a-z0-9.]+/g,'-').slice(-60);
@@ -1719,6 +1825,9 @@ async function save(){
     if(s.x.file && s.x.file !== data.file) await st.sb.storage.from('media').remove([s.x.file]);
     if(tipo==='tema'){ const usate = new Set(data.approfondimenti.map(a => a.immagine).filter(Boolean));
       const vecchie = (s.x.approfondimenti||[]).map(a => a.immagine).filter(p => p && !usate.has(p));
+      if(vecchie.length) await st.sb.storage.from('media').remove(vecchie); }
+    if(tipo==='articolo'){ const usate = new Set(data.immagini.map(a => a.immagine));
+      const vecchie = imgArt(s.x).map(a => a.immagine).filter(p => !usate.has(p));
       if(vecchie.length) await st.sb.storage.from('media').remove(vecchie); }
     closeSheet(); toast('Salvato');
     if(data.mese !== st.mese) st.mese = data.mese;
@@ -1869,7 +1978,10 @@ async function loadData(){
     if(!st.canEdit && !pr.error) (pr.data||[]).forEach(r => { if(!d[r.chiave]) d['pres-'+r.id] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:'presenza', insegnante:true, ref:r.chiave}; });
     st.done = d; saveLocal(); }
   st.presenze = st.canEdit && !pr.error ? (pr.data||[]) : [];
-  const paths = [...new Set(st.contenuti.map(x => x.file).concat(st.temi.flatMap(t => (t.approfondimenti||[]).map(a => a.immagine))).filter(Boolean))];
+  const paths = [...new Set(st.contenuti.map(x => x.file).concat(st.temi.flatMap(t => (t.approfondimenti||[]).map(a => a.immagine)), st.contenuti.flatMap(x => imgArt(x).map(i => i.immagine))).filter(Boolean))];
+  const artIds = st.contenuti.filter(x => x.tipo==='articolo' && !x.esempio).map(x => x.id);
+  if(artIds.length){ const cm = await st.sb.from('commenti').select('id,contenuto_id,autore,nome,insegnante,testo,creato').in('contenuto_id', artIds).order('creato');
+    if(!cm.error){ const g = {}; (cm.data||[]).forEach(c => (g[c.contenuto_id] = g[c.contenuto_id] || []).push(c)); artIds.forEach(id => st.commenti[id] = g[id] || []); } }
   if(paths.length){
     const sg = await st.sb.storage.from('media').createSignedUrls(paths, 6*3600);
     if(!sg.error) (sg.data||[]).forEach(r => { const u = r.signedUrl || r.signedURL; if(u && r.path) st.urls[r.path] = u; });
@@ -1914,6 +2026,18 @@ document.addEventListener('submit', async e => {
     if(r.error){ btn.disabled = false; btn.textContent = 'Entra'; err.textContent = 'Codice non valido o scaduto. Controlla le cifre oppure chiedine uno nuovo.'; err.hidden = false; return; }
     st.login = {step:'start', canale:L.canale, dest:''};
     onSession(r.data && r.data.session);
+  }
+  if(f.id==='comm-f'){
+    e.preventDefault();
+    const id = f.dataset.id, testo = $('#comm-t').value.trim(), err = $('#comm-err'), btn = $('#comm-go');
+    err.hidden = true;
+    if(!testo){ err.textContent = 'Scrivi qualcosa prima di pubblicare.'; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = 'Pubblico…';
+    const r = await st.sb.from('commenti').insert({contenuto_id:id, testo}).select('id,contenuto_id,autore,nome,insegnante,testo,creato').single();
+    if(r.error){ btn.disabled = false; btn.textContent = 'Pubblica'; err.textContent = 'Il commento non si è pubblicato. Controlla la connessione e riprova.'; err.hidden = false; return; }
+    st.commenti[id] = (st.commenti[id]||[]).concat(r.data); delete st.bozze[id];
+    toast('Commento pubblicato'); render(true);
+    return;
   }
   if(f.id==='or-f'){
     e.preventDefault();
