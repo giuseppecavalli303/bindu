@@ -1,5 +1,5 @@
 -- =====================================================================
--- Mandala · blog: immagini negli articoli e commenti delle allieve
+-- Mandala · blog (immagini negli articoli, commenti) e testi della pausa posturale
 -- Si può rieseguire senza danni.
 -- =====================================================================
 
@@ -53,5 +53,20 @@ create policy "ognuna elimina i suoi, l'insegnante tutti" on public.commenti for
   using (autore = auth.uid() or public.is_admin());
 -- Nessuna modifica: un commento si elimina e si riscrive.
 
+-- Impostazioni modificabili da Tiziana nell'app (per ora: i testi della pausa posturale).
+create table if not exists public.impostazioni (
+  chiave text primary key,
+  valore jsonb not null,
+  aggiornato timestamptz not null default now()
+);
+alter table public.impostazioni enable row level security;
+drop policy if exists "allieve leggono le impostazioni" on public.impostazioni;
+create policy "allieve leggono le impostazioni" on public.impostazioni for select to authenticated
+  using (public.is_member());
+drop policy if exists "insegnante scrive le impostazioni" on public.impostazioni;
+create policy "insegnante scrive le impostazioni" on public.impostazioni for all to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+
 select (select count(*) from public.commenti) as commenti,
-       (select count(*) from information_schema.columns where table_name = 'contenuti' and column_name = 'immagini') as colonna_immagini;
+       (select count(*) from information_schema.columns where table_name = 'contenuti' and column_name = 'immagini') as colonna_immagini,
+       (select count(*) from public.impostazioni) as impostazioni;

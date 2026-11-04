@@ -606,7 +606,7 @@ const LS = 'pdm-pratica-v1';
 const st = {temi:[], contenuti:[], lezioni:[], orario:[], orEdit:null, presenze:[], mailSett:null, mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
   loading:true, offline:false, armed:null, done:{}, uid:null, pRef:null, pLoaded:false, localOnly:false,
   pQueue:Promise.resolve(), dirty:false, tmin:10, scene:'alba',
-  sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[], commenti:{}, bozze:{},
+  sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[], commenti:{}, bozze:{}, pausa:null,
   login:{step:'start', canale:'email', dest:''}, lastLoad:0};
 try{ const v = JSON.parse(localStorage.getItem(LS)||'{}'); if(v && typeof v==='object') st.done = v; }catch(_){}
 
@@ -945,7 +945,7 @@ function mandalaCard(){
     <div class="m-txt"><span class="eyebrow">Il tuo mandala di ${esc(meseNome(st.mese))}</span><h2>${titolo}</h2><p class="muted">${testo}</p>
     <ul class="legend">${Object.entries(NOME_SEZ).map(([k,nm]) => `<li class="${COLORE[k]}"><span class="sw"></span>${nm}<b>${c[k]||0}</b></li>`).join('')}</ul>
     ${rito}${attesa}${cal.html}<p class="hint">${cal.giorni} ${cal.giorni===1?'giorno':'giorni'} di pratica${cal.serie>1 ? ` · ${cal.serie} giorni di fila` : ''}</p>
-    ${st.mese===MESE_OGGI && !sc ? `<div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">Pausa posturale · 2 min</button></div>` : ''}${diario(P)}${localNote}</div></section>`;
+    ${st.mese===MESE_OGGI && !sc ? `<div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">${esc(PZ().titolo)} · ${esc(durataPausa(true))}</button></div>` : ''}${diario(P)}${localNote}</div></section>`;
 }
 
 function invito(){
@@ -1065,9 +1065,9 @@ function viewSezione(k){
       <p class="muted">Scegli la durata e chiudi gli occhi. Una campana segna l'inizio e la fine, e la pratica entra nel tuo mandala.</p>
       <div class="foot"><button class="btn primary" data-act="timer">Inizia</button></div></div></section>` : '';
   const pausaCard = k==='posturale' && st.mese===MESE_OGGI ? `<section class="card timer-card s-post"><div class="tc-art">${sceneSvg('lago')}</div>
-      <div class="body"><span class="eyebrow">Ogni giorno</span><h2 style="font-size:1.6rem">Pausa posturale</h2>
-      <p class="muted">Due minuti guidati per sciogliere collo, spalle e schiena dopo tante ore alla scrivania. Un suono leggero segna ogni passaggio.</p>
-      <div class="foot"><button class="btn primary" data-act="pausa">Inizia la pausa</button></div></div></section>` : '';
+      <div class="body"><span class="eyebrow">Ogni giorno · ${esc(durataPausa())}</span><h2 style="font-size:1.6rem">${esc(PZ().titolo)}</h2>
+      <p class="muted">${esc(PZ().descrizione)}</p>
+      <div class="foot"><button class="btn primary" data-act="pausa">Inizia la pausa</button>${st.canEdit ? '<button class="btn" data-act="pausa-mod">Modifica la pausa</button>' : ''}</div></div></section>` : '';
   const live = prossime(k).slice(0,4), ot = orarioTesto(k);
   const gL = (live.length || st.canEdit) ? `<section class="group"><div class="group-head"><h2>Dal vivo</h2>${ot ? `<span class="muted">Ogni ${esc(ot)}</span>` : ''}${addBtn('diretta',k,'+ Lezione dal vivo')}</div>
     ${live.length ? `<div class="lives">${live.map(liveCard).join('')}</div>` : `<div class="empty">Nessuna lezione in calendario.</div>`}</section>` : '';
@@ -1484,21 +1484,95 @@ function closeTimer(){
 }
 
 /* ---------- pausa posturale guidata ---------- */
-const PAUSA = [
-  {t:'Allunga la colonna', d:'Piedi ben appoggiati a terra. Inspirando cresci verso l\'alto, come se un filo ti tirasse dalla testa. Espirando lascia scendere le spalle.'},
-  {t:'Fai rotolare le spalle', d:'Porta le spalle verso le orecchie, poi indietro e giù. Movimenti lenti e ampi, seguendo il respiro.'},
-  {t:'Apri il petto', d:'Intreccia le mani dietro la schiena, allunga le braccia e solleva lo sterno. Lo sguardo resta morbido.'},
-  {t:'Respira nelle costole', d:'Mani sui lati delle costole basse. Inspira allargandole sotto le mani, espira lasciandole rientrare.'}
-];
-const PASSO = 30;
+// Testi di partenza: Tiziana li cambia da "Modifica la pausa" (tabella impostazioni, chiave 'pausa').
+const PAUSA_BASE = {
+  titolo:'Pausa posturale',
+  descrizione:'Due minuti guidati per sciogliere collo, spalle e schiena dopo tante ore alla scrivania. Un suono leggero segna ogni passaggio.',
+  intro:'Puoi farla alla scrivania o in piedi. Un suono leggero segna il passaggio al movimento successivo.',
+  fine:'Un nuovo anello nel tuo mandala. Torna a questa pausa ogni volta che ne senti il bisogno.',
+  secondi:30,
+  passi:[
+    {t:'Allunga la colonna', d:'Piedi ben appoggiati a terra. Inspirando cresci verso l\'alto, come se un filo ti tirasse dalla testa. Espirando lascia scendere le spalle.'},
+    {t:'Fai rotolare le spalle', d:'Porta le spalle verso le orecchie, poi indietro e giù. Movimenti lenti e ampi, seguendo il respiro.'},
+    {t:'Apri il petto', d:'Intreccia le mani dietro la schiena, allunga le braccia e solleva lo sterno. Lo sguardo resta morbido.'},
+    {t:'Respira nelle costole', d:'Mani sui lati delle costole basse. Inspira allargandole sotto le mani, espira lasciandole rientrare.'}
+  ]
+};
+function PZ(){
+  const v = st.pausa && typeof st.pausa === 'object' ? st.pausa : {}, b = PAUSA_BASE;
+  const passi = Array.isArray(v.passi) ? v.passi.filter(p => p && (p.t || p.d)) : [];
+  const sec = Number(v.secondi);
+  return {titolo:v.titolo || b.titolo, descrizione:v.descrizione || b.descrizione, intro:v.intro || b.intro, fine:v.fine || b.fine,
+    secondi: sec >= 10 && sec <= 300 ? sec : b.secondi, passi: passi.length ? passi : b.passi};
+}
+const NUMERI = ['zero','un','due','tre','quattro','cinque','sei','sette','otto','nove','dieci','undici','dodici'];
+function durataPausa(breve){
+  const P = PZ(), tot = P.passi.length * P.secondi, m = Math.floor(tot/60), r = tot % 60;
+  if(breve) return r ? `${Math.max(1, Math.round(tot/60))} min` : `${m} min`;
+  if(!m) return `${tot} secondi`;
+  return (m===1 ? '1 minuto' : `${m} minuti`) + (r ? ` e ${r} secondi` : '');
+}
+function titoloIntro(){
+  const P = PZ(), n = P.passi.length;
+  return n===1 ? `Un movimento di ${P.secondi} secondi` : `${(NUMERI[n]||n).replace(/^./, c => c.toUpperCase())} movimenti, ${P.secondi} secondi ciascuno`;
+}
+function openPausaMod(){
+  const P = PZ();
+  $('#sheet-host').innerHTML = `<div class="sheet-bg" id="sheet-bg"><form class="sheet" id="pzm-f" role="dialog" aria-modal="true" aria-labelledby="pzm-title" novalidate>
+    <div class="sheet-head"><h2 id="pzm-title">Modifica la pausa</h2><button type="button" class="btn" id="pzm-close">Chiudi</button></div>
+    <div class="field"><label for="pzm-titolo">Titolo</label><input id="pzm-titolo" value="${esc(P.titolo)}"></div>
+    <div class="field"><label for="pzm-desc">Descrizione nella sezione Posturale</label><textarea class="corta" id="pzm-desc" rows="3">${esc(P.descrizione)}</textarea></div>
+    <div class="field"><label for="pzm-intro">Frase prima di iniziare</label><textarea class="corta" id="pzm-intro" rows="2">${esc(P.intro)}</textarea></div>
+    <div class="field"><label for="pzm-sec">Durata di ogni movimento</label><select id="pzm-sec">${[15,20,30,45,60,90,120].map(v => `<option value="${v}" ${v===P.secondi?'selected':''}>${v<60 ? v+' secondi' : v===60 ? '1 minuto' : v===90 ? '1 minuto e mezzo' : '2 minuti'}</option>`).join('')}</select>
+      <span class="hint" id="pzm-tot"></span></div>
+    <div class="field"><label>Movimenti</label><span class="hint">Un suono leggero segna il passaggio da uno all'altro.</span>
+      <div id="pzm-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      <button type="button" class="btn" id="pzm-add" style="align-self:flex-start">+ Aggiungi movimento</button></div>
+    <div class="field"><label for="pzm-fine">Messaggio alla fine</label><textarea class="corta" id="pzm-fine" rows="2">${esc(P.fine)}</textarea></div>
+    <p class="form-err" id="pzm-err" hidden></p>
+    <div class="sheet-actions"><button type="button" class="btn" id="pzm-reset">Torna ai testi iniziali</button><button type="button" class="btn" id="pzm-cancel">Annulla</button><button type="submit" class="btn primary" id="pzm-save">Salva</button></div>
+  </form></div>`;
+  const tot = () => { const n = document.querySelectorAll('.pzm-row').length, sec = Number($('#pzm-sec').value) * n;
+    $('#pzm-tot').textContent = `In tutto: ${Math.floor(sec/60) ? Math.floor(sec/60)+' min ' : ''}${sec%60 ? sec%60+' s' : ''} (${n} ${n===1?'movimento':'movimenti'}).`; };
+  const add = p => { const row = document.createElement('div'); row.className = 'ap-row pzm-row'; const n = ++apN;
+    row.innerHTML = `<input class="inp pzm-t" id="pzm-t-${n}" aria-label="Nome del movimento" placeholder="Nome del movimento" value="${esc(p.t||'')}">
+      <textarea class="inp ta pzm-d" id="pzm-d-${n}" aria-label="Come si fa" rows="3" placeholder="Come si fa, con parole semplici">${esc(p.d||'')}</textarea>
+      <div class="ap-file"><button type="button" class="btn pzm-su">↑ Sposta su</button><button type="button" class="btn danger pzm-del">Togli movimento</button></div>`;
+    row.querySelector('.pzm-del').addEventListener('click', () => { row.remove(); tot(); });
+    row.querySelector('.pzm-su').addEventListener('click', () => { const pr = row.previousElementSibling; if(pr) row.parentNode.insertBefore(row, pr); });
+    $('#pzm-list').appendChild(row); tot(); };
+  P.passi.forEach(add);
+  $('#pzm-add').addEventListener('click', () => { add({}); const r = [...document.querySelectorAll('.pzm-t')].pop(); if(r) r.focus(); });
+  $('#pzm-sec').addEventListener('change', tot);
+  $('#pzm-reset').addEventListener('click', () => {
+    $('#pzm-titolo').value = PAUSA_BASE.titolo; $('#pzm-desc').value = PAUSA_BASE.descrizione; $('#pzm-intro').value = PAUSA_BASE.intro; $('#pzm-fine').value = PAUSA_BASE.fine;
+    $('#pzm-sec').value = String(PAUSA_BASE.secondi); $('#pzm-list').innerHTML = ''; PAUSA_BASE.passi.forEach(add); toast('Testi iniziali ripristinati: premi Salva per confermare'); });
+  $('#pzm-close').addEventListener('click', closeSheet); $('#pzm-cancel').addEventListener('click', closeSheet);
+  $('#sheet-bg').addEventListener('click', e => { if(e.target.id==='sheet-bg') closeSheet(); });
+  $('#pzm-f').addEventListener('submit', e => { e.preventDefault(); salvaPausaMod(); });
+  document.addEventListener('keydown', sheetKey);
+  setTimeout(() => $('#pzm-titolo').focus(), 30);
+}
+async function salvaPausaMod(){
+  const err = $('#pzm-err'), btn = $('#pzm-save'); err.hidden = true;
+  const passi = [...document.querySelectorAll('.pzm-row')].map(r => ({t:r.querySelector('.pzm-t').value.trim(), d:r.querySelector('.pzm-d').value.trim()})).filter(p => p.t || p.d);
+  if(!passi.length){ err.textContent = 'Serve almeno un movimento.'; err.hidden = false; return; }
+  if(passi.some(p => !p.t)){ err.textContent = 'Dai un nome a ogni movimento.'; err.hidden = false; return; }
+  const valore = {titolo:$('#pzm-titolo').value.trim(), descrizione:$('#pzm-desc').value.trim(), intro:$('#pzm-intro').value.trim(),
+    fine:$('#pzm-fine').value.trim(), secondi:Number($('#pzm-sec').value), passi};
+  btn.disabled = true; btn.textContent = 'Salvataggio…';
+  const r = await st.sb.from('impostazioni').upsert({chiave:'pausa', valore, aggiornato:new Date().toISOString()});
+  if(r.error){ btn.disabled = false; btn.textContent = 'Salva'; err.textContent = 'Salvataggio non riuscito: ' + (r.error.message||'errore') + '.'; err.hidden = false; return; }
+  st.pausa = valore; closeSheet(); toast('Pausa aggiornata'); render(true);
+}
 function openPausa(){
   document.querySelectorAll('audio,video').forEach(m => { if(!m.paused) m.pause(); });
   $('#timer-host').innerHTML = `<div class="tov light" role="dialog" aria-modal="true" aria-labelledby="pz-t">${sceneSvg('lago')}<div class="tov-in">
-    <span class="eyebrow">Posturale · Pausa di 2 minuti</span>
-    <div class="steps-dots" id="pz-dots" aria-hidden="true">${PAUSA.map(() => '<i></i>').join('')}</div>
-    <h2 class="pausa-t" id="pz-t">Quattro movimenti, trenta secondi ciascuno</h2>
-    <p class="pausa-d" id="pz-d">Puoi farla alla scrivania o in piedi. Un suono leggero segna il passaggio al movimento successivo.</p>
-    <div class="tov-time" id="pz-time">2:00</div>
+    <span class="eyebrow">Posturale · ${esc(PZ().titolo)} · ${esc(durataPausa())}</span>
+    <div class="steps-dots" id="pz-dots" aria-hidden="true">${PZ().passi.map(() => '<i></i>').join('')}</div>
+    <h2 class="pausa-t" id="pz-t">${esc(titoloIntro())}</h2>
+    <p class="pausa-d" id="pz-d">${esc(PZ().intro)}</p>
+    <div class="tov-time" id="pz-time">${fmt(PZ().passi.length * PZ().secondi)}</div>
     <div class="tov-act"><button class="btn" id="pz-x">Chiudi</button><button class="btn primary" id="pz-go">Inizia</button></div></div></div>`;
   $('#pz-x').addEventListener('click', closeTimer);
   $('#pz-go').addEventListener('click', startPausa);
@@ -1507,6 +1581,7 @@ function openPausa(){
 }
 function startPausa(){
   bell(.7);
+  const P = PZ(), PASSO = P.secondi, PAUSA = P.passi;
   const start = Date.now(), tot = PAUSA.length*PASSO; let step = -1;
   const go = $('#pz-go'); go.textContent = 'Termina'; go.replaceWith(go.cloneNode(true)); $('#pz-go').addEventListener('click', closeTimer);
   $('#pz-x').hidden = true;
@@ -1518,7 +1593,7 @@ function startPausa(){
     const s = Math.floor(sec/PASSO);
     if(s !== step){
       if(step >= 0) bell(.4);
-      step = s; $('#pz-t').textContent = PAUSA[s].t; $('#pz-d').textContent = PAUSA[s].d;
+      step = s; $('#pz-t').textContent = PAUSA[s].t || ''; $('#pz-d').textContent = PAUSA[s].d || '';
       document.querySelectorAll('#pz-dots i').forEach((d,i) => d.classList.toggle('on', i<=s));
     }
     el.textContent = fmt(PASSO - (sec - s*PASSO));
@@ -1527,10 +1602,10 @@ function startPausa(){
 }
 function finishPausa(){
   bell(.7);
-  $('#pz-t').textContent = 'Fatto'; $('#pz-d').textContent = 'Un nuovo anello nel tuo mandala. Torna a questa pausa ogni volta che ne senti il bisogno.';
+  $('#pz-t').textContent = 'Fatto'; $('#pz-d').textContent = PZ().fine;
   $('#pz-time').textContent = '';
   const go = $('#pz-go'); if(go){ go.textContent = 'Torna all\'app'; go.focus(); }
-  setDone('pausa-'+Date.now(), true, {sezione:'posturale', titolo:'Pausa posturale'});
+  setDone('pausa-'+Date.now(), true, {sezione:'posturale', titolo:PZ().titolo});
 }
 
 /* ---------- actions ---------- */
@@ -1575,6 +1650,7 @@ document.addEventListener('click', async e => {
   }
   else if(act==='watch'){ const x = findItem(id); if(x) openPlayer(x); }
   else if(act==='pausa') openPausa();
+  else if(act==='pausa-mod') openPausaMod();
   else if(act==='sciogli'){
     if(st.armed!=='sciogli'){ st.armed='sciogli'; render(true); clearTimeout(st._arm); st._arm=setTimeout(() => { if(st.armed==='sciogli'){ st.armed=null; render(); } },6000); return; }
     st.armed = null; dissolvi(st.mese);
@@ -1971,6 +2047,8 @@ async function loadData(){
   st.offline = false;
   st.temi = (t.data||[]).map(x => Object.assign({}, x, {approfondimenti: Array.isArray(x.approfondimenti) ? x.approfondimenti : []}));
   if(!orr.error) st.orario = orr.data || [];
+  const imp = await st.sb.from('impostazioni').select('chiave,valore').eq('chiave','pausa').maybeSingle();
+  if(!imp.error) st.pausa = imp.data ? imp.data.valore : null;
   st.contenuti = (c.data || []).concat(lezioniOrario());
   if(!lz.error) st.lezioni = (lz.data||[]).map(LZ);
   if(!p.error){ const d = {}; (p.data||[]).forEach(r => d[r.chiave] = {at:r.at, mese:r.mese, sezione:r.sezione, titolo:r.titolo, minuti:r.minuti??null, tipo:r.tipo??null, nota:r.nota??null});
