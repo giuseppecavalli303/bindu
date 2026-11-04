@@ -444,6 +444,33 @@ button.thumb{border:0;padding:0;width:100%;cursor:pointer;font:inherit;color:inh
 @keyframes loto-pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.loto.pop svg{animation:none}}
 .art-azioni{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* Cerchio */
+.ctabs{display:flex;gap:6px;padding:5px;background:var(--surface);border:1px solid var(--line);border-radius:999px;align-self:flex-start;max-width:100%;overflow-x:auto}
+.ctab{border:0;background:transparent;border-radius:999px;padding:9px 16px;font-weight:600;font-size:.92rem;color:var(--muted);cursor:pointer;white-space:nowrap}
+.ctab[aria-selected="true"]{background:var(--lilac-ink);color:var(--surface)}
+.cz-top{padding:22px 24px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cz-top h2{font-size:1.35rem;margin-bottom:4px}
+.cz-top .muted{max-width:52ch}
+.voci{display:flex;flex-direction:column;gap:14px}
+.voce{padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.voce-head{display:flex;gap:12px;align-items:center}
+.voce-head .av{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:600;background:var(--lilac);color:var(--on-soft)}
+.voce.ins .voce-head .av{background:var(--lilac-ink);color:var(--surface)}
+.voce-head small{display:block;color:var(--muted);font-size:.8rem}
+.voce .txt{overflow-wrap:anywhere}
+.voce .txt p+p{margin-top:.5em}
+.voce-foot{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.voce-foot .btn{padding:4px 12px;font-size:.8rem}
+.cz-tag{font-size:.9rem;color:var(--muted)}
+.cz-pratica{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:color-mix(in srgb, var(--soft, var(--lilac)) 35%, var(--surface));border:1px solid var(--line)}
+.cz-pratica .dot{flex:none;width:14px;height:14px;border-radius:50%;background:var(--sez, var(--lilac-ink))}
+.cz-pratica small{display:block;color:var(--muted);font-size:.84rem}
+.cz-mandala{display:flex;flex-direction:column;align-items:center;gap:8px}
+.cz-mandala canvas{width:min(100%, 280px);aspect-ratio:1}
+.cz-scelta{display:flex;flex-direction:column;gap:8px}
+.cz-scelta label{display:flex;gap:8px;align-items:center}
+.field .lbl{font-weight:600;font-size:.9rem}
+.tema-link{text-decoration:none}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .comm-f textarea{min-height:84px}
 .comm-f .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
@@ -554,12 +581,12 @@ const ICON = {
   yoga:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 5c2 2.2 2.6 5 0 9-2.6-4-2-6.8 0-9Z"/><path d="M12 14c-2.5-.5-5.5-2.5-7-5.5 3.5 0 6 1.5 7 5.5Zm0 0c2.5-.5 5.5-2.5 7-5.5-3.5 0-6 1.5-7 5.5Z"/><path d="M4 17.5c4 2 12 2 16 0"/></svg>',
   posturale:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="2.5" width="6" height="3.2" rx="1.4"/><rect x="8.5" y="7.4" width="7" height="3.2" rx="1.4"/><rect x="8.5" y="12.3" width="7" height="3.2" rx="1.4"/><rect x="9" y="17.2" width="6" height="3.2" rx="1.4"/></svg>',
   mindfulness:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>',
-  blog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 14.5h7M9 18h4"/></svg>',
+  blog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6"/><circle cx="12" cy="20" r="1.6"/><circle cx="4" cy="12" r="1.6"/><circle cx="20" cy="12" r="1.6"/><circle cx="6.3" cy="6.3" r="1.3"/><circle cx="17.7" cy="17.7" r="1.3"/><circle cx="17.7" cy="6.3" r="1.3"/><circle cx="6.3" cy="17.7" r="1.3"/></svg>',
   play:'<svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13l10.5-6.5z" fill="currentColor"/></svg>',
   pause:'<svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5.5" width="3.6" height="13" rx="1.2" fill="currentColor"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1.2" fill="currentColor"/></svg>',
   petal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3 3.2 3.4 7.6 0 12-3.4-4.4-3-8.8 0-12Z" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.5"/><path d="M5 20c4-1.2 10-1.2 14 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>'
 };
-const TABS = [['home','Home'],['yoga','Yoga'],['posturale','Posturale'],['mindfulness','Mindfulness'],['blog','Blog']];
+const TABS = [['home','Home'],['yoga','Yoga'],['posturale','Posturale'],['mindfulness','Mindfulness'],['blog','Cerchio']];
 
 /* ---------- scenes (pastel landscapes) ---------- */
 const SCENES = {
@@ -617,9 +644,10 @@ const LS = 'pdm-pratica-v1';
 const st = {temi:[], contenuti:[], lezioni:[], orario:[], orEdit:null, presenze:[], mailSett:null, mese:MESE_OGGI, route:'home', canEdit:false, db:null, assets:null,
   loading:true, offline:false, armed:null, done:{}, uid:null, pRef:null, pLoaded:false, localOnly:false,
   pQueue:Promise.resolve(), dirty:false, tmin:10, scene:'alba',
-  sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[], commenti:{}, bozze:{}, pausa:null, loti:{},
+  sb:null, session:null, chi:'', member:false, authReady:false, configured:false, urls:{}, allieve:[], commenti:{}, bozze:{}, pausa:null, loti:{}, cerchio:[], cLoti:{}, cerchioAt:0, cTab:'post',
   login:{step:'start', canale:'email', dest:''}, lastLoad:0};
 try{ const v = JSON.parse(localStorage.getItem(LS)||'{}'); if(v && typeof v==='object') st.done = v; }catch(_){}
+try{ const t = localStorage.getItem('mandala-ctab'); if(t==='post' || t==='voci') st.cTab = t; }catch(_){}
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -765,13 +793,13 @@ function drawRing(ctx, type, r, count, s, soft, deep){
     ctx.restore();
   }
 }
-function drawMandala(cv, still){
+function drawMandala(cv, still, pratiche){
   const dpr = Math.min(2, window.devicePixelRatio||1), W = cv.clientWidth || 300, px = Math.round(W*dpr);
   if(cv.width !== px){ cv.width = px; cv.height = px; }
   const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,W);
   const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
   const COL = {yoga:[g('--rose'),g('--rose-ink')], posturale:[g('--lav'),g('--lav-ink')], mindfulness:[g('--lilac'),g('--lilac-ink')], movimento:[g('--peach'),g('--peach-ink')]};
-  const P = praticheMese(), n = P.length;
+  const P = pratiche || praticheMese(), n = P.length;
   // lo spessore di ogni anello segue la durata: 30 minuti = 1, da 0,45 a 1,8
   const peso = p => { const m = Number(p.minuti); return m > 0 ? Math.min(1.8, Math.max(.45, m/30)) : 1; };
   const pesi = P.map(peso), tot = Math.max(pesi.reduce((a,b) => a+b, 0), 6);
@@ -956,7 +984,7 @@ function mandalaCard(){
     <div class="m-txt"><span class="eyebrow">Il tuo mandala di ${esc(meseNome(st.mese))}</span><h2>${titolo}</h2><p class="muted">${testo}</p>
     <ul class="legend">${Object.entries(NOME_SEZ).map(([k,nm]) => `<li class="${COLORE[k]}"><span class="sw"></span>${nm}<b>${c[k]||0}</b></li>`).join('')}</ul>
     ${rito}${attesa}${cal.html}<p class="hint">${cal.giorni} ${cal.giorni===1?'giorno':'giorni'} di pratica${cal.serie>1 ? ` · ${cal.serie} giorni di fila` : ''}</p>
-    ${st.mese===MESE_OGGI && !sc ? `<div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">${esc(PZ().titolo)} · ${esc(durataPausa(true))}</button></div>` : ''}${diario(P)}${localNote}</div></section>`;
+    ${st.mese===MESE_OGGI && !sc ? `<div class="m-btns"><button class="btn primary" data-act="registra">Registra una pratica</button><button class="btn" data-act="timer">Siediti in silenzio</button><button class="btn" data-act="pausa">${esc(PZ().titolo)} · ${esc(durataPausa(true))}</button></div>` : ''}${n && !sc ? `<p class="hint"><button class="linkish" type="button" data-act="cz-mandala">Condividi il tuo mandala nel Cerchio</button></p>` : ''}${diario(P)}${localNote}</div></section>`;
 }
 
 function invito(){
@@ -975,7 +1003,7 @@ function diario(P){
   const rows = P.slice().reverse().map(p => { const armed = st.armed==='pr/'+p.key;
     return `<li class="${COLORE[p.sezione]||'s-mind'}"><span class="dot"></span><div><span class="t">${esc(p.titolo||'Pratica')}</span>
       <small>${esc(dataGiorno(p.at))}${p.minuti ? ' · '+esc(durTxt(p.minuti)) : ''} · ${esc(NOME_SEZ[p.sezione]||'')}</small>${p.nota ? `<p class="nota">${esc(p.nota)}</p>` : ''}</div>
-      ${p.insegnante ? `<span class="da">Presenza segnata da Tiziana</span>` : `<div class="acts"><button class="btn" data-act="pr-edit" data-id="${esc(p.key)}">Modifica</button><button class="btn danger ${armed?'armed':''}" data-act="pr-del" data-id="${esc(p.key)}">${armed?'Conferma':'Togli'}</button></div>`}</li>`; }).join('');
+      ${p.insegnante ? `<span class="da">Presenza segnata da Tiziana</span>` : `<div class="acts"><button class="btn" data-act="cz-pratica" data-id="${esc(p.key)}">Condividi</button><button class="btn" data-act="pr-edit" data-id="${esc(p.key)}">Modifica</button><button class="btn danger ${armed?'armed':''}" data-act="pr-del" data-id="${esc(p.key)}">${armed?'Conferma':'Togli'}</button></div>`}</li>`; }).join('');
   return `<details class="diario" ${st.diarioOpen?'open':''}><summary>Il diario di ${esc(meseNome(st.mese))} <small>${P.length} ${P.length===1?'pratica':'pratiche'}${tot ? ' · '+esc(durTxt(tot)) : ''}</small></summary><ul>${rows}</ul></details>`;
 }
 document.addEventListener('toggle', e => { if(e.target.classList && e.target.classList.contains('diario')) st.diarioOpen = e.target.open; }, true);
@@ -1095,15 +1123,110 @@ function viewSezione(k){
     + `<div class="wrap stack lift ${s.cls}">${notices()}${temaCard}${k==='yoga' ? '' : k==='mindfulness' ? percorsoTesto(temi, k) + gMed : percorsoTesto(temi, k) + gLez}${timerCard}${pausaCard}${k==='mindfulness' ? gB : k==='posturale' ? gL+lezAnno(k, st.mese)+gB : gV+lezAnno(k)+gL+gB}</div>`;
 }
 function viewBlog(){
-  const art = contDi(null,'articolo');
-  return hero('tramonto', `<span class="eyebrow">Blog · ${esc(meseLabel(st.mese))}</span><h1>Letture del mese</h1>
-      <p class="sub">Articoli legati ai temi di yoga, posturale e mindfulness.</p>${addBtn('articolo','','+ Articolo')}`, 'short')
-    + `<div class="wrap stack lift">${notices()}${art.length ? `<div class="list">${art.map(x => articleCard(x,true)).join('')}</div>`
-      : `<div class="empty">${st.loading ? 'Caricamento…' : 'Nessun articolo per '+esc(meseNome(st.mese))+'.'}</div>`}</div>`;
+  const art = contDi(null,'articolo'), voci = st.cTab==='voci';
+  if(voci && Date.now() - st.cerchioAt > 60000) setTimeout(() => caricaCerchio(), 0);
+  const linguette = `<div class="ctabs" role="tablist" aria-label="Il Cerchio">
+      <button role="tab" class="ctab" data-act="ctab" data-id="post" aria-selected="${!voci}">I post di Tiziana</button>
+      <button role="tab" class="ctab" data-act="ctab" data-id="voci" aria-selected="${voci}">Le voci del Cerchio</button></div>`;
+  const temi = st.temi.filter(t => t.mese===st.mese).map(t => { const s = SEZ[t.sezione] || SEZ.yoga;
+    return `<a class="card item tema-link ${s.cls}" href="#${esc(t.sezione)}"><div class="body"><div class="meta"><span class="chip">Tema del mese · ${esc(s.nome)}</span></div>
+      <h3>${esc(t.titolo)}</h3>${t.sottotitolo ? `<p class="desc">${esc(t.sottotitolo)}</p>` : ''}<div class="foot"><span class="read">Vai a ${esc(s.nome)} →</span></div></div></a>`; }).join('');
+  const post = `${temi ? `<section class="group"><div class="group-head"><h2>I temi di ${esc(meseNome(st.mese))}</h2></div><div class="list">${temi}</div></section>` : ''}
+    <section class="group"><div class="group-head"><h2>Letture</h2>${addBtn('articolo','','+ Articolo')}</div>${art.length ? `<div class="list">${art.map(x => articleCard(x,true)).join('')}</div>`
+      : `<div class="empty">${st.loading ? 'Caricamento…' : 'Nessuna lettura per '+esc(meseNome(st.mese))+'.'}</div>`}</section>`;
+  const lista = st.cerchio.map(vocePost).join('');
+  const vociHtml = `<div class="cz-top card"><div><h2>Come stai, oggi?</h2><p class="muted">Un pensiero, l'energia che senti dopo una lezione, un passo avanti nella pratica: qui lo condividi con le compagne.</p></div>
+      <button class="btn primary" data-act="cz-nuovo">Lascia un pensiero nel Cerchio</button></div>
+    ${lista ? `<div class="voci">${lista}</div>` : `<div class="empty">${st.cerchioAt ? 'Il Cerchio è ancora silenzioso. Lascia tu la prima voce.' : 'Caricamento…'}</div>`}`;
+  return hero('tramonto', `<span class="eyebrow">Cerchio · ${esc(meseLabel(st.mese))}</span><h1>Il Cerchio</h1>
+      <p class="sub">Le letture di Tiziana e le voci delle compagne di pratica.</p>`, 'short')
+    + `<div class="wrap stack lift">${notices()}${linguette}${voci ? vociHtml : post}</div>`;
+}
+const TIPO_VOCE = {pensiero:'ha lasciato un pensiero', impressione:'dopo la lezione', pratica:'ha praticato', mandala:'ha condiviso il suo mandala'};
+function vocePost(v){
+  const io = st.session && st.session.user && st.session.user.id, d = v.dati || {}, armed = st.armed === 'cz/'+v.id;
+  let corpo = '';
+  if(v.tipo==='impressione' && d.lezione) corpo += `<p class="cz-tag">Dopo <b>${esc(d.lezione)}</b></p>`;
+  if(v.tipo==='pratica'){ const s = COLORE[d.sezione] || 's-mind';
+    corpo += `<p class="cz-pratica ${s}"><span class="dot"></span><span><b>${esc(d.titolo||'Una pratica')}</b><small>${[NOME_SEZ[d.sezione], d.minuti ? durTxt(d.minuti) : ''].filter(Boolean).map(esc).join(' · ')}</small></span></p>`; }
+  if(v.tipo==='mandala'){ const n = (d.pratiche||[]).length;
+    corpo += `<div class="cz-mandala"><canvas data-cm="${esc(v.id)}" role="img" aria-label="Il mandala di ${esc(v.nome||'')}: ${n} ${n===1?'pratica':'pratiche'}"></canvas><p class="muted">Il mandala di ${esc(meseNome(d.mese||st.mese))} · ${n} ${n===1?'pratica':'pratiche'}</p></div>`; }
+  if(v.testo) corpo += `<div class="txt">${paras(v.testo)}</div>`;
+  return `<article class="card voce ${v.insegnante?'ins':''}"><div class="voce-head"><span class="av" aria-hidden="true">${esc(iniziale(v.nome))}</span>
+      <div><b>${esc(v.nome||'Un\'allieva')}</b> <span class="muted">${esc(TIPO_VOCE[v.tipo]||'')}</span><small>${esc(quandoComm(v.creato))}</small></div></div>
+    ${corpo}<div class="voce-foot">${lotoGen(v.id, st.cLoti[v.id], 'cloto', 'a questa voce')}
+      ${v.autore===io || st.canEdit ? `<button class="btn danger ${armed?'armed':''}" data-act="cz-del" data-id="${esc(v.id)}">${armed?'Conferma':'Togli'}</button>` : ''}</div></article>`;
+}
+const praticheDi = d => (d.pratiche||[]).map(p => ({sezione:p.s, minuti:p.m}));
+function disegnaCerchio(){
+  document.querySelectorAll('canvas[data-cm]').forEach(cv => { const v = st.cerchio.find(x => x.id===cv.dataset.cm); if(v) drawMandala(cv, true, praticheDi(v.dati||{})); });
+  const pv = document.getElementById('cz-prev'); if(pv && st.czMandala) drawMandala(pv, true, praticheDi(st.czMandala));
+}
+async function caricaCerchio(){
+  if(!st.sb || !st.session || caricaCerchio.in) return;
+  caricaCerchio.in = true;
+  const r = await st.sb.from('cerchio').select('*').order('creato', {ascending:false}).limit(150);
+  if(!r.error){
+    st.cerchio = r.data || [];
+    const ids = st.cerchio.map(v => v.id), io = st.session.user && st.session.user.id, L = {};
+    if(ids.length){ const lr = await st.sb.from('cerchio_loti').select('post_id,autore').in('post_id', ids);
+      if(!lr.error) (lr.data||[]).forEach(x => { const l = L[x.post_id] = L[x.post_id] || {n:0, mio:false}; l.n++; if(x.autore===io) l.mio = true; }); }
+    st.cLoti = L;
+  }
+  st.cerchioAt = Date.now(); caricaCerchio.in = false;
+  if(st.route==='blog') render();
+}
+function lezioniRecenti(){
+  return st.contenuti.filter(c => c.tipo==='diretta' && c.quando && Date.parse(c.quando) <= Date.now() + 3600e3 && Date.parse(c.quando) > Date.now() - 4*86400e3)
+    .sort((a,b) => String(b.quando).localeCompare(String(a.quando))).slice(0,6);
+}
+function openCondividi(o){
+  const tipo = o.tipo, P = o.pratica, mese = st.mese;
+  st.czMandala = tipo==='mandala' ? {mese, pratiche:praticheMese().map(p => ({s:p.sezione, m:p.minuti||null})).slice(0,200)} : null;
+  const lez = lezioniRecenti();
+  const titolo = tipo==='pratica' ? 'Condividi la tua pratica' : tipo==='mandala' ? 'Condividi il tuo mandala' : 'Lascia un pensiero nel Cerchio';
+  const dettaglio = tipo==='pratica' ? `<p class="cz-pratica ${COLORE[P.sezione]||'s-mind'}"><span class="dot"></span><span><b>${esc(P.titolo||'Pratica')}</b><small>${[NOME_SEZ[P.sezione], P.minuti ? durTxt(P.minuti) : '', dataGiorno(P.at)].filter(Boolean).map(esc).join(' · ')}</small></span></p>`
+    : tipo==='mandala' ? `<div class="cz-mandala"><canvas id="cz-prev" role="img" aria-label="Anteprima del tuo mandala"></canvas><p class="muted">Il tuo mandala di ${esc(meseNome(mese))} · ${st.czMandala.pratiche.length} ${st.czMandala.pratiche.length===1?'pratica':'pratiche'}</p></div>`
+    : `<div class="field"><span class="lbl">Che cosa vuoi condividere?</span><div class="cz-scelta">
+        <label><input type="radio" name="cz-t" value="pensiero" checked> Un pensiero</label>
+        <label><input type="radio" name="cz-t" value="impressione" ${lez.length?'':'disabled'}> Un'impressione dopo la lezione</label></div></div>
+      <div class="field" id="cz-lez-f" hidden><label for="cz-lez">Quale lezione?</label><select id="cz-lez">${lez.map((l,i) => `<option value="${i}">${esc(l.titolo)} · ${esc(dataGiorno(l.quando))}</option>`).join('')}</select></div>`;
+  $('#sheet-host').innerHTML = `<div class="sheet-bg" id="sheet-bg"><form class="sheet" id="cz-f" role="dialog" aria-modal="true" aria-labelledby="cz-title" novalidate>
+    <div class="sheet-head"><h2 id="cz-title">${titolo}</h2><button type="button" class="btn" id="cz-close">Chiudi</button></div>
+    ${dettaglio}
+    <div class="field"><label for="cz-testo">${tipo==='pensiero' ? 'Il tuo pensiero' : 'Vuoi aggiungere due parole? (facoltativo)'}</label>
+      <textarea id="cz-testo" maxlength="1000" rows="4" placeholder="${tipo==='pensiero' ? 'Come ti senti, cosa ti porti a casa…' : 'Com\'è andata, come ti senti…'}"></textarea></div>
+    <p class="hint">Lo vedono Tiziana e le compagne iscritte a Mandala, con il tuo nome. Puoi toglierlo quando vuoi.</p>
+    <p class="form-err" id="cz-err" hidden></p>
+    <div class="sheet-actions"><button type="button" class="btn" id="cz-cancel">Annulla</button><button type="submit" class="btn primary" id="cz-go">Condividi nel Cerchio</button></div>
+  </form></div>`;
+  document.querySelectorAll('input[name="cz-t"]').forEach(r => r.addEventListener('change', () => { $('#cz-lez-f').hidden = document.querySelector('input[name="cz-t"]:checked').value !== 'impressione'; }));
+  $('#cz-close').addEventListener('click', closeSheet); $('#cz-cancel').addEventListener('click', closeSheet);
+  $('#sheet-bg').addEventListener('click', e => { if(e.target.id==='sheet-bg') closeSheet(); });
+  document.addEventListener('keydown', sheetKey);
+  $('#cz-f').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('#cz-err'), btn = $('#cz-go'), testo = $('#cz-testo').value.trim(); err.hidden = true;
+    let t = tipo, dati = {};
+    if(tipo==='pensiero'){ t = document.querySelector('input[name="cz-t"]:checked').value;
+      if(!testo){ err.textContent = 'Scrivi qualcosa prima di condividere.'; err.hidden = false; return; }
+      if(t==='impressione'){ const l = lez[Number($('#cz-lez').value)]; if(l) dati = {lezione:l.titolo, sezione:l.sezione, quando:l.quando}; } }
+    if(tipo==='pratica') dati = {titolo:P.titolo||'Pratica', sezione:P.sezione, minuti:P.minuti||null, at:P.at};
+    if(tipo==='mandala') dati = st.czMandala;
+    if(!st.sb || !st.session){ err.textContent = 'Serve la connessione per condividere.'; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = 'Condivido…';
+    const r = await st.sb.from('cerchio').insert({tipo:t, testo:testo || null, dati}).select('*').single();
+    if(r.error){ btn.disabled = false; btn.textContent = 'Condividi nel Cerchio'; err.textContent = 'Non sono riuscita a condividerlo. Controlla la connessione e riprova.'; err.hidden = false; return; }
+    st.cerchio.unshift(r.data); st.czMandala = null; closeSheet(); closeTimer && document.querySelector('#timer-host .tov') && closeTimer();
+    st.cTab = 'voci'; try{ localStorage.setItem('mandala-ctab', 'voci'); }catch(_){}
+    toast('Condiviso nel Cerchio');
+    if(st.route==='blog') render(true); else location.hash = 'blog';
+  });
+  setTimeout(() => { disegnaCerchio(); const t = $('#cz-testo'); if(t) t.focus(); }, 30);
 }
 function viewArticolo(id){
   const x = st.contenuti.find(c => c.id===id);
-  if(!x) return hero('tramonto', `<a class="back" href="#blog">← Blog</a><h1>${st.loading ? 'Caricamento…' : 'Articolo non disponibile'}</h1>`, 'short')
+  if(!x) return hero('tramonto', `<a class="back" href="#blog">← Cerchio</a><h1>${st.loading ? 'Caricamento…' : 'Articolo non disponibile'}</h1>`, 'short')
     + `<div class="wrap stack lift"><div class="empty">${st.loading ? 'Un momento…' : 'Questo articolo non è più disponibile.'}</div></div>`;
   const s = SEZ[x.sezione] || SEZ.yoga, tema = temiDi(x.sezione, x.mese)[0];
   return hero(s.scena, `<a class="back" href="#${esc(x.sezione)}">← ${esc(s.nome)}</a><span class="eyebrow">${esc(s.nome)} · ${esc(meseLabel(x.mese))}</span><h1>${esc(x.titolo)}</h1>`, 'short')
@@ -1127,10 +1250,11 @@ function proseConImmagini(x){
   return out.join('');
 }
 const LOTO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19c-2.6-1.6-4-4.3-4-7.2 0-2.3.9-4.6 4-7.3 3.1 2.7 4 5 4 7.3 0 2.9-1.4 5.6-4 7.2Z" class="cen"/><path d="M12 19c-3.3.4-6.9-.8-9-3.8 2-1.6 4.5-2.1 6.3-1.6M12 19c3.3.4 6.9-.8 9-3.8-2-1.6-4.5-2.1-6.3-1.6"/></svg>';
-function lotoBtn(x){
-  const l = st.loti[x.id] || {n:0, mio:false};
-  const etichetta = l.mio ? 'Togli il tuo fiore di loto' : 'Metti un fiore di loto a questo articolo';
-  return `<button type="button" class="loto ${l.mio?'on':''}" data-act="loto" data-id="${esc(x.id)}" aria-pressed="${l.mio}" aria-label="${etichetta}${l.n ? ', '+l.n+' in tutto' : ''}" title="${l.mio ? 'Ti è piaciuto' : 'Mi piace'}">${LOTO_SVG}<span>${l.n || ''}</span></button>`;
+function lotoBtn(x){ return lotoGen(x.id, st.loti[x.id], 'loto', 'a questo articolo'); }
+function lotoGen(id, l, act, cosa){
+  l = l || {n:0, mio:false};
+  const etichetta = l.mio ? 'Togli il tuo fiore di loto' : 'Metti un fiore di loto ' + cosa;
+  return `<button type="button" class="loto ${l.mio?'on':''}" data-act="${act}" data-id="${esc(id)}" aria-pressed="${l.mio}" aria-label="${etichetta}${l.n ? ', '+l.n+' in tutto' : ''}" title="${l.mio ? 'Ti è piaciuto' : 'Mi piace'}">${LOTO_SVG}<span>${l.n || ''}</span></button>`;
 }
 const iniziale = n => (String(n||'?').trim()[0] || '?').toUpperCase();
 function quandoComm(t){
@@ -1184,7 +1308,7 @@ function render(force){
   $('#view').innerHTML = html;
   document.documentElement.style.setProperty('--hdr', SCENES[st.scene].fg);
   const now = performance.now(); document.querySelectorAll('[data-breath]').forEach(el => el.dataset.breath = now);
-  measure(); onScroll(); ensureMandala();
+  measure(); onScroll(); ensureMandala(); disegnaCerchio();
 }
 
 /* breathing labels follow the orb: 4 s in, 6 s out */
@@ -1493,7 +1617,10 @@ function finishTimer(mins){
   const tm = $('#tov-time'); if(tm) tm.textContent = 'Fatto';
   const orb = $('#tov-orb'); if(orb) orb.classList.remove('breathe');
   const go = $('#tov-go'); if(go){ go.textContent = 'Torna all\'app'; go.focus(); }
-  setDone('timer-'+Date.now(), true, {sezione:'mindfulness', titolo:'Silenzio · '+mins+' min'});
+  const kt = 'timer-'+Date.now();
+  setDone(kt, true, {sezione:'mindfulness', titolo:'Silenzio · '+mins+' min'});
+  const act = document.querySelector('#timer-host .tov-act');
+  if(act && !act.querySelector('.cz-dopo')) act.insertAdjacentHTML('afterbegin', `<button class="btn ghost-l cz-dopo" data-act="cz-pratica" data-id="${esc(kt)}">Condividi nel Cerchio</button>`);
 }
 function closeTimer(){
   clearInterval(st.tick);
@@ -1623,7 +1750,10 @@ function finishPausa(){
   $('#pz-t').textContent = 'Fatto'; $('#pz-d').textContent = PZ().fine;
   $('#pz-time').textContent = '';
   const go = $('#pz-go'); if(go){ go.textContent = 'Torna all\'app'; go.focus(); }
-  setDone('pausa-'+Date.now(), true, {sezione:'posturale', titolo:PZ().titolo});
+  const kp = 'pausa-'+Date.now();
+  setDone(kp, true, {sezione:'posturale', titolo:PZ().titolo});
+  const act = document.querySelector('#timer-host .tov-act');
+  if(act && !act.querySelector('.cz-dopo')) act.insertAdjacentHTML('afterbegin', `<button class="btn cz-dopo" data-act="cz-pratica" data-id="${esc(kp)}">Condividi nel Cerchio</button>`);
 }
 
 /* ---------- actions ---------- */
@@ -1695,16 +1825,28 @@ document.addEventListener('click', async e => {
     if(a.paused) a.play().catch(() => toast('Questo audio non si riesce a riprodurre.')); else a.pause(); }
   else if(act==='seek'){ const a = document.getElementById('au-'+id); if(!a || !isFinite(a.duration)) return;
     const r = b.getBoundingClientRect(); a.currentTime = Math.min(1, Math.max(0, (e.clientX-r.left)/r.width)) * a.duration; updPlayer(a); }
-  else if(act==='loto'){
-    const l = st.loti[id] = st.loti[id] || {n:0, mio:false}, io = st.session && st.session.user && st.session.user.id;
+  else if(act==='loto' || act==='cloto'){
+    const art = act==='loto', mappa = art ? st.loti : st.cLoti, tab = art ? 'mi_piace' : 'cerchio_loti', col = art ? 'contenuto_id' : 'post_id';
+    const l = mappa[id] = mappa[id] || {n:0, mio:false}, io = st.session && st.session.user && st.session.user.id;
     if(!io || st.lotoIn) return;
     st.lotoIn = true; const prima = {n:l.n, mio:l.mio};
     l.mio = !l.mio; l.n = Math.max(0, l.n + (l.mio ? 1 : -1)); render(true);
-    if(l.mio){ const el = document.querySelector(`[data-act="loto"][data-id="${CSS.escape(id)}"]`); if(el) el.classList.add('pop'); }
-    const r = l.mio ? await st.sb.from('mi_piace').insert({contenuto_id:id})
-                    : await st.sb.from('mi_piace').delete().eq('contenuto_id', id).eq('autore', io);
+    if(l.mio){ const el = document.querySelector(`[data-act="${act}"][data-id="${CSS.escape(id)}"]`); if(el) el.classList.add('pop'); }
+    const r = l.mio ? await st.sb.from(tab).insert({[col]:id})
+                    : await st.sb.from(tab).delete().eq(col, id).eq('autore', io);
     st.lotoIn = false;
     if(r.error && !(l.mio && r.error.code === '23505')){ Object.assign(l, prima); render(true); toast('Non sono riuscita a salvarlo. Riprova.'); }
+  }
+  else if(act==='ctab'){ st.cTab = id; try{ localStorage.setItem('mandala-ctab', id); }catch(_){} render(true); if(id==='voci') caricaCerchio(); }
+  else if(act==='cz-nuovo'){ openCondividi({tipo:'pensiero'}); }
+  else if(act==='cz-pratica'){ const p = st.done[id]; if(p) openCondividi({tipo:'pratica', pratica:Object.assign({key:id}, p)}); }
+  else if(act==='cz-mandala'){ openCondividi({tipo:'mandala'}); }
+  else if(act==='cz-del'){
+    const key = 'cz/'+id;
+    if(st.armed!==key){ st.armed=key; render(true); clearTimeout(st._arm); st._arm=setTimeout(() => { if(st.armed===key){ st.armed=null; render(); } },4000); return; }
+    st.armed = null;
+    const r = await st.sb.from('cerchio').delete().eq('id', id);
+    if(r.error) toast('Non riesco a toglierla. Riprova.'); else { st.cerchio = st.cerchio.filter(v => v.id!==id); toast('Tolta dal Cerchio'); render(true); }
   }
   else if(act==='comm-del'){
     const key = 'comm/'+id, art = b.dataset.art;
@@ -2098,6 +2240,7 @@ async function loadData(){
   if(st.canEdit){ const a = await st.sb.from('allieve').select('id,email,telefono,nome,mail_settimanale').order('nome', {nullsFirst:false}); if(!a.error) st.allieve = a.data || []; }
   else { const m = await st.sb.rpc('mia_mail_settimanale'); st.mailSett = m.error ? null : m.data !== false; }
   st.loading = false; render(); renderCrono();
+  caricaCerchio();
 }
 let ultimoToken = null;
 async function onSession(session){
